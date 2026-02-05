@@ -1,23 +1,85 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>MKIT Services</title>
+  <meta charset="UTF-8" />
+  <title>Analog Clock</title>
+  <style>
+    body{
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      height:100vh;
+      background:#f2f2f2;
+      margin:0;
+      font-family: Arial, sans-serif;
+    }
 
-    <!-- Link CSS -->
-    <link rel="stylesheet" href="css/style.css">
+    .clock{
+      width:260px;
+      height:260px;
+      background:black;
+      border-radius:50%;
+      position:relative;
+      border:10px solid #222;
+    }
+
+    .hand{
+      position:absolute;
+      bottom:50%;
+      left:50%;
+      transform-origin:bottom;
+      transform: translateX(-50%) rotate(0deg);
+      background:white;
+    }
+
+    .hour{ width:6px; height:70px; }
+    .minute{ width:4px; height:100px; }
+    .second{ width:2px; height:115px; background:white; }
+
+    .center-dot{
+      width:12px;
+      height:12px;
+      background:white;
+      border-radius:50%;
+      position:absolute;
+      top:50%;
+      left:50%;
+      transform:translate(-50%,-50%);
+    }
+  </style>
 </head>
+
 <body>
+  <div class="clock">
+    <div class="hand hour" id="hour"></div>
+    <div class="hand minute" id="minute"></div>
+    <div class="hand second" id="second"></div>
+    <div class="center-dot"></div>
+  </div>
 
-    <div class="clock-container">
-        <img src="images/Adelaide.png" alt=""zkMKIT services logo" class=""logo">
-        <h1>MKIT services</h1>
-        <h2> This page is created my developer and system administrator Mr Manoj Kumar</h2>
-        <div id="clock">00:00:00</div>
-    </div>
+  <script>
+    function updateClock(){
+      const now = new Date();
 
-    <!-- Link JavaScript -->
-    <script src="js/clock.js"></script>
+      const seconds = now.getSeconds();
+      const minutes = now.getMinutes();
+      const hours = now.getHours();
+
+      const secondDeg = seconds * 6;                 // 360/60
+      const minuteDeg = minutes * 6 + seconds * 0.1; // smooth minute hand
+      const hourDeg = (hours % 12) * 30 + minutes * 0.5; // 360/12 + smooth
+
+      document.getElementById("second").style.transform =
+        `translateX(-50%) rotate(${secondDeg}deg)`;
+      document.getElementById("minute").style.transform =
+        `translateX(-50%) rotate(${minuteDeg}deg)`;
+      document.getElementById("hour").style.transform =
+        `translateX(-50%) rotate(${hourDeg}deg)`;
+    }
+
+    setInterval(updateClock, 1000);
+    updateClock();
+  </script>
 </body>
 </html>
 
