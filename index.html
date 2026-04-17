@@ -1,74 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Simple Website with Clock</title>
+<meta charset="UTF-8">
+<title>Simple Website with Clock</title>
 
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-        }
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
 
-        /* HEADER */
-        header {
-            background-color: #0f5a08;
-            padding: 15px 0;
-        }
+/* HEADER */
+header {
+    background-color: #0f5a08;
+    padding: 15px 0;
+}
 
-        nav {
-            display: flex;
-            justify-content: center;
-        }
+nav {
+    display: flex;
+    justify-content: center;
+}
 
-        nav ul {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-            display: flex;
-        }
+nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+}
 
-        nav ul li {
-            position: relative;
-        }
+nav ul li {
+    position: relative;
+}
 
-        nav ul li a {
-            color: rgb(238, 224, 224);
-            padding: 15px 20px;
-            text-decoration: none;
-            display: block;
-            cursor: pointer;
-        }
+nav ul li a {
+    color: rgb(238, 224, 224);
+    padding: 15px 20px;
+    text-decoration: none;
+    display: block;
+    cursor: pointer;
+}
 
-        nav ul li a:hover {
-            background-color: #031301;
-        }
+nav ul li a:hover {
+    background-color: #031301;
+}
 
-        /* DROPDOWN */
-        nav ul li ul {
-            display: none;
-            position: absolute;
-            background-color: #054932;
-            top: 50px;
-            min-width: 150px;
-        }
+/* DROPDOWN */
+nav ul li ul {
+    display: none;
+    position: absolute;
+    background-color: #0f5a08;
+    top: 50px;
+    min-width: 150px;
+    z-index: 9999;
+}
 
-        nav ul li ul li a {
-            padding: 10px;
-        }
+nav ul li ul li a {
+    padding: 10px;
+}
 
-        nav ul li:hover ul {
-            display: block;
-        }
+nav ul li:hover ul {
+    display: block;
+}
 
-        /* MAIN */
-        main {
-            padding: 40px;
-            text-align: center;
-        }
+/* MAIN */
+main {
+    padding: 40px;
+    text-align: center;
+}
 
-        /* CLOCK */
-       .clock {
+/* CLOCK */
+.clock {
     width: 260px;
     height: 260px;
     border: 8px solid #0a0c08;
@@ -76,130 +77,161 @@
     margin: 30px auto;
     position: relative;
     background: rgb(179, 194, 178);
-    z-index: 1; /* ensure it's below dropdown */
 }
 
-nav ul li ul {
-    display: none;
+/* NUMBERS */
+.number {
     position: absolute;
-    background-color: #0f5a08;
-    top: 50px;
-    min-width: 150px;
-    z-index: 9999; /* ensure dropdown appears in front */
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    font-weight: bold;
 }
 
-        .number {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            text-align: center;
-            font-weight: bold;
-        }
+.number span {
+    display: block;
+    transform: translateY(10px);
+}
 
-        .number span {
-            display: block;
-            transform: translateY(10px);
-        }
+/* HAND BASE */
+.hand {
+    position: absolute;
+    bottom: 50%;
+    left: 50%;
+    transform-origin: bottom;
+    transform: translateX(-50%);
+}
 
-        .hand {
-            position: absolute;
-            bottom: 50%;
-            left: 50%;
-            transform-origin: bottom;
-            transform: translateX(-50%);
-        }
+/* HOUR HAND */
+.hour {
+    width: 10px;
+    height: 65px;
+    background: black;
+    border-radius: 10px;
+    z-index: 3;
+}
 
-        .hour {
-            width: 6px;
-            height: 65px;
-            background: #333;
-        }
+/* MINUTE HAND */
+.minute {
+    width: 6px;
+    height: 90px;
+    background: black;
+    border-radius: 10px;
+    z-index: 2;
+}
 
-        .minute {
-            width: 6px;
-            height: 90px;
-            background: #555;
-        }
+/* SECOND HAND */
+.second {
+    width: 2px;
+    height: 120px;
+    background: red;
+    z-index: 1;
+}
 
-        .second {
-            width: 1px;
-            height: 125px;
-            background: red;
-        }
+/* HOUR = M */
+.hour::after {
+    content: "M";
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    background: black;
+    color: white;
+    font-size: 11px;
+    font-weight: bold;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: translateX(-50%);
+}
 
-        .center-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 22px;
-            font-weight: bold;
-        }
+/* MINUTE = K */
+.minute::after {
+    content: "K";
+    position: absolute;
+    top: 25px;
+    left: 50%;
+    width: 18px;
+    height: 18px;
+    background: black;
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: translateX(-50%);
+}
 
-        /* CONTACT MODAL */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.6);
-        }
+/* SECOND = V (VISIBLE) */
+.second::after {
+    content: "V";
+    position: absolute;
+    top: 30px;
+    left: 50%;
+    width: 16px;
+    height: 16px;
+    background: red;
+    color: white;
+    font-size: 9px;
+    font-weight: bold;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: translateX(-50%);
+}
 
-        .modal-content {
-            background: white;
-            width: 300px;
-            padding: 20px;
-            border-radius: 8px;
-            margin: 120px auto;
-            text-align: center;
-            position: relative;
-        }
+/* CENTER TEXT */
+.center-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 22px;
+    font-weight: bold;
+}
 
-        .close {
-            position: absolute;
-            top: 8px;
-            right: 12px;
-            font-size: 20px;
-            cursor: pointer;
-        }
-
-        /* FOOTER */
-        footer {
-            background-color: #0f5a08;
-            color: white;
-            text-align: center;
-            padding: 15px;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-        }
-    </style>
+/* FOOTER */
+footer {
+    background-color: #0f5a08;
+    color: white;
+    text-align: center;
+    padding: 15px;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+</style>
 </head>
 
 <body>
 
 <header>
-    <nav>
-        <ul>
-            <li><a>Home</a></li>
+<nav>
+<ul>
+<li><a>Home</a></li>
 
-            <li>
-                <a>Tech Services </a>
-                <ul>
-                    <li><a>Web Design</a></li>
-                    <li><a>Development</a></li>
-                    <li><a>SEO</a></li>
-                    <li><a>Services</a></li>
-                </ul>
-        
-             <li><a>Electronic Store </a>
-                <ul>
-                    <li><a href="#" target="_blank">Electronic Store</a></li>
-                    <li><a href="https://www.jbhifi.com.au/" target="_blank">JB Hi-Fi</a></li>
+<li>
+<a>Tech Services</a>
+<ul>
+<li><a>Web Design</a></li>
+<li><a>Development</a></li>
+<li><a>SEO</a></li>
+<li><a>Services</a></li>
+</ul>
+</li>
+
+<li>
+<a>Electronic Store</a>
+<ul>
+ <li><a href="https://www.jbhifi.com.au/" target="_blank">JB Hi-Fi</a></li>
                     <li><a href="https://www.thegoodguys.com.au/" target="_blank"> The Good Guys</a></li>
                     <li><a href="https://www.harveynorman.com.au/" target="_blank"> Harvey Norman</a></li>
+                    <li><a href="https://www.thegoodguys.com.au/" target="_blank"> The Good Guys</a></li>
                     <li><a href="https://www.officeworks.com.au/" target="_blank"> Office Works</a></li>
                     <li><a href="https://www.officenational.com.au/shop/en/obb2cstore" target="_blank"> Office National</a></li>
                     <li><a href="https://www.bunnings.com.au/" target="_blank"> Bunning</a></li>
@@ -212,28 +244,29 @@ nav ul li ul {
                     <li><a href="https://www.target.com.au/"target=" _blank"> Target</a></li>
                     <li><a href="https://www.myer.com.au/"target=" _blank"> Myer</a></li>
                     <li><a href="https://www.myer.com.au/"target=" _blank"> Cotton On</a></li>
-                    
-                    </ul>
-             <li><a>Grocery Store </a>
-                <ul>
+</ul>
+</li>
+
+<li>
+<a>Grocery Store</a>
+<ul>
                     <li><a href="https://www.coles.com.au/" target="_blank">Coles</a></li>
                     <li><a href="https://www.woolworths.com.au/" target="_blank"> Woolworths</a></li>
                     <li><a href="https://www.aldi.com.au/" target="_blank"> ALDI</a></li>
                     <li><a href="https://drakes.com.au/" target="_blank"> Drakes</a></li>
                     <li><a href="https://www.igashop.com.au/" target="_blank"> IGA </a></li>
                     <li><a href="https://www.costco.com.au/" target="_blank"> Costco </a></li>
-                    
-                </ul>
-            <li><a>International Fashion Brands </a>
+</ul>
+</li>
+  <li><a>International Fashion Brands </a>
                 <ul>
                     <li><a href="https://www.zara.com/au/" target="_blank">Zara</a></li>
                     <li><a href="https://www2.hm.com/en_au/index.html" target="_blank"> H&M</a></li>
                     <li><a href="https://www.uniqlo.com/au/en/" target="_blank"> UNIQLO</a></li>
                     <li><a href="https://www.forever21.com/" target="_blank"> Forever 21 </a></li>
+                    </ul>
                   
-                    
-                </ul>
-                <li><a>Medical Store </a>
+        <li><a>Medical Store </a>
                 <ul>
                     <li><a href="https://terrywhitechemmart.com.au/" target="_blank">TerryWhite </a></li>
                     <li><a href="https://www.chemistwarehouse.com.au/" target="_blank"> ChemistWarehouse</a></li>
@@ -242,95 +275,73 @@ nav ul li ul {
                     <li><a href="https://www.stardiscountchemist.com.au/" target="_blank"> StartDiscountchemist </a></li>
                   
                     
-                </ul>
-                
-          
-            <li><a onclick="openContact()">Contact</a></li>
-        </ul>
-    </nav>
+                </ul>             
+
+<li><a onclick="openContact()">Contact</a></li>
+</ul>
+</nav>
 </header>
 
 <main>
-    <h1>Welcome to my website.<br> I am Manoj Verma, an IT professional based in Adelaide Australia</h1>
+<h1>Welcome to my website.<br> I am Manoj Verma, an IT professional based in  Australia</h1>
     <p>Contact me for Technical IT Related Support in Australia  </p>
     <p> I provide professional IT technical support services across Australia,
          specialising in systems administration, network infrastructure, and cybersecurity. 
          <br>With expertise in Windows Server, Active Directory, cloud platforms, and enterprise networking, I deliver reliable, scalable, and secure IT solutions for businesses.
-    <div class="clock">
-        <div class="number" style="transform: rotate(0deg)"><span>12</span></div>
-        <div class="number" style="transform: rotate(30deg)"><span style="transform: rotate(-30deg)">1</span></div>
-        <div class="number" style="transform: rotate(60deg)"><span style="transform: rotate(-60deg)">2</span></div>
-        <div class="number" style="transform: rotate(90deg)"><span style="transform: rotate(-90deg)">3</span></div>
-        <div class="number" style="transform: rotate(120deg)"><span style="transform: rotate(-120deg)">4</span></div>
-        <div class="number" style="transform: rotate(150deg)"><span style="transform: rotate(-150deg)">5</span></div>
-        <div class="number" style="transform: rotate(180deg)"><span style="transform: rotate(-180deg)">6</span></div>
-        <div class="number" style="transform: rotate(210deg)"><span style="transform: rotate(-210deg)">7</span></div>
-        <div class="number" style="transform: rotate(240deg)"><span style="transform: rotate(-240deg)">8</span></div>
-        <div class="number" style="transform: rotate(270deg)"><span style="transform: rotate(-270deg)">9</span></div>
-        <div class="number" style="transform: rotate(300deg)"><span style="transform: rotate(-300deg)">10</span></div>
-        <div class="number" style="transform: rotate(330deg)"><span style="transform: rotate(-330deg)">11</span></div>
 
-        <div class="hand hour" id="hour"></div>
-        <div class="hand minute" id="minute"></div>
-        <div class="hand second" id="second"></div>
+<div class="clock">
 
-        <br>
-        <div class="center-text">Your Local Time</div>
-    </div>
-    <p> <strong>Every day is the best day when I'm with you </strong><br><br>
+    <!-- ALL NUMBERS 1–12 -->
+    <div class="number" style="transform: rotate(0deg)"><span>12</span></div>
+    <div class="number" style="transform: rotate(30deg)"><span style="transform: rotate(-30deg)">1</span></div>
+    <div class="number" style="transform: rotate(60deg)"><span style="transform: rotate(-60deg)">2</span></div>
+    <div class="number" style="transform: rotate(90deg)"><span style="transform: rotate(-90deg)">3</span></div>
+    <div class="number" style="transform: rotate(120deg)"><span style="transform: rotate(-120deg)">4</span></div>
+    <div class="number" style="transform: rotate(150deg)"><span style="transform: rotate(-150deg)">5</span></div>
+    <div class="number" style="transform: rotate(180deg)"><span style="transform: rotate(-180deg)">6</span></div>
+    <div class="number" style="transform: rotate(210deg)"><span style="transform: rotate(-210deg)">7</span></div>
+    <div class="number" style="transform: rotate(240deg)"><span style="transform: rotate(-240deg)">8</span></div>
+    <div class="number" style="transform: rotate(270deg)"><span style="transform: rotate(-270deg)">9</span></div>
+    <div class="number" style="transform: rotate(300deg)"><span style="transform: rotate(-300deg)">10</span></div>
+    <div class="number" style="transform: rotate(330deg)"><span style="transform: rotate(-330deg)">11</span></div>
 
+    <!-- HANDS (KEEP SAME) -->
+    <div class="hand hour" id="hour"></div>
+    <div class="hand minute" id="minute"></div>
+    <div class="hand second" id="second"></div>
 
+    <!-- CENTER TEXT -->
+    <div class="center-text">Your Local Time</div>
 
-
+</div>
 </main>
 
-
-
-<!-- CONTACT DETAILS -->
-<div class="modal" id="contactModal">
-    <div class="modal-content">
-        <span class="close" onclick="closeContact()">×</span>
-        <h2>Contact Details</h2>
-        <p><strong>Name:</strong> Manoj Verma</p>
-        <p><strong>Email:</strong> </p>
-        
-        <p><strong>Phone:</strong></p>
-    </div> 
-</div>
-
 <footer>
-    <p> © 2026 Manoj Kumar. All Rights Reserved. | Designed & Developed by Manoj Kumar</p>
+<p> © 2026 Manoj Kumar. All Rights Reserved. | Designed & Developed by Manoj Kumar</p>
     <small>Note: All trademarks belong to their respective owners. This website is created for demonstration purposes only and is not affiliated with any of the listed brands.</small>
     
 </footer>
 
 <script>
-    function updateClock() {
-        const now = new Date();
-        const seconds = now.getSeconds();
-        const minutes = now.getMinutes();
-        const hours = now.getHours();
+function updateClock() {
+const now = new Date();
 
-        document.getElementById("second").style.transform =
-            `translateX(-50%) rotate(${seconds * 6}deg)`;
+const sec = now.getSeconds();
+const min = now.getMinutes();
+const hr = now.getHours();
 
-        document.getElementById("minute").style.transform =
-            `translateX(-50%) rotate(${minutes * 6}deg)`;
+document.getElementById("second").style.transform =
+`translateX(-50%) rotate(${sec * 6}deg)`;
 
-        document.getElementById("hour").style.transform =
-            `translateX(-50%) rotate(${(hours % 12) * 30 + minutes / 2}deg)`;
-    }
+document.getElementById("minute").style.transform =
+`translateX(-50%) rotate(${min * 6 + sec * 0.1}deg)`;
 
-    setInterval(updateClock, 1000);
-    updateClock();
+document.getElementById("hour").style.transform =
+`translateX(-50%) rotate(${(hr % 12) * 30 + min * 0.5}deg)`;
+}
 
-    function openContact() {
-        document.getElementById("contactModal").style.display = "block";
-    }
-
-    function closeContact() {
-        document.getElementById("contactModal").style.display = "none";
-    }
+setInterval(updateClock, 1000);
+updateClock();
 </script>
 
 </body>
