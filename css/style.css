@@ -16,3 +16,21 @@ body {
     margin-top: 10px;
     color: #38bdf8;
 }
+.marquee {
+  overflow: hidden;
+}
+
+.marquee p {
+  display: inline-block;
+  white-space: nowrap;
+  animation: move 8s linear infinite;
+}
+
+@keyframes move {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
