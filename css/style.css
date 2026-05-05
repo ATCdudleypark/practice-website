@@ -18,19 +18,16 @@ body {
 }
 .marquee {
   overflow: hidden;
+  white-space: nowrap;
 }
 
 .marquee p {
   display: inline-block;
-  white-space: nowrap;
-  animation: move 8s linear infinite;
+  padding-left: 100%;
+  animation: move 10s linear infinite;
 }
 
 @keyframes move {
-  from {
-    transform: translateX(-100%);
-  }
-  to {
-    transform: translateX(100%);
-  }
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-100%); }
 }
