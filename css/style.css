@@ -31,3 +31,11 @@ body {
   0% { transform: translateX(0); }
   100% { transform: translateX(-100%); }
 }
+.mothersday{
+    text-align: center;
+}
+
+.mothersday img{
+    width: 500px;
+    max-width: 100%;
+}
