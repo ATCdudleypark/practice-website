@@ -32,7 +32,9 @@ body {
   100% { transform: translateX(-100%); }
 }
 .mothersday{
-    text-align: center;
+    width: 100%;
+    display: flex;
+    justify-content: center;
 }
 
 .mothersday img{
