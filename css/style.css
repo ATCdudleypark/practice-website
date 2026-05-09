@@ -37,7 +37,7 @@ body {
 }
 
 .mothersday img{
-    width: 500%;
-    max-width: 1000px;
-    display: block;
+    width: 80%;
+    max-width: 1200px;
+    height: auto;
 }
