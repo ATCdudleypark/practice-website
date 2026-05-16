@@ -46,3 +46,8 @@ body {
     font-size: 22px;
     color: darkblue;
 }
+@media(max-width:768px){
+   nav{
+      flex-direction:column;
+   }
+}
