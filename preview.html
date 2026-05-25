@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PTE Write From Dictation Practice</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #eef2f7;
+      color: #1f2937;
+      padding: 20px;
+    }
+    .container {
+      max-width: 950px;
+      margin: auto;
+      background: #ffffff;
+      padding: 24px;
+      border-radius: 14px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    }
+    h1 { text-align: center; color: #0f3b66; margin-top: 0; }
+    .topbar {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+      background: #f8fafc;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+    }
+    .counter { font-size: 18px; font-weight: bold; }
+    select, input[type="number"] {
+      padding: 9px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+    .sentence-box {
+      background: #f1f7ff;
+      border-left: 6px solid #2563eb;
+      padding: 18px;
+      border-radius: 10px;
+      margin: 18px 0;
+      font-size: 23px;
+      line-height: 1.5;
+      font-weight: bold;
+    }
+    textarea {
+      width: 100%;
+      height: 130px;
+      padding: 14px;
+      font-size: 19px;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      resize: vertical;
+      outline: none;
+    }
+    textarea:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+    .buttons { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+    button {
+      border: none;
+      border-radius: 9px;
+      padding: 12px 18px;
+      font-size: 16px;
+      cursor: pointer;
+      color: #fff;
+    }
+    .check { background: #2563eb; }
+    .next { background: #16a34a; }
+    .prev { background: #64748b; }
+    .clear { background: #dc2626; }
+    .hide { background: #7c3aed; }
+    .result {
+      margin-top: 18px;
+      padding: 16px;
+      border-radius: 10px;
+      background: #f8fafc;
+      border: 1px solid #e5e7eb;
+      font-size: 18px;
+      line-height: 1.7;
+    }
+    .right { color: #15803d; font-weight: bold; }
+    .wrong { color: #dc2626; font-weight: bold; }
+    .missing { color: #b45309; font-weight: bold; }
+    .extra { color: #9333ea; font-weight: bold; }
+    .small { font-size: 14px; color: #64748b; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>PTE Write From Dictation Practice</h1>
+
+    <div class="topbar">
+      <div class="counter">Sentence <span id="currentNo">1</span> / <span id="totalNo">225</span></div>
+      <div>
+        <label for="jumpNo"><b>Go to:</b></label>
+        <input type="number" id="jumpNo" min="1" max="225" value="1" />
+        <button class="check" onclick="jumpSentence()">Open</button>
+      </div>
+      <div>
+        <label for="mode"><b>Mode:</b></label>
+        <select id="mode" onchange="displaySentence()">
+          <option value="show">Show sentence</option>
+          <option value="hide">Hide sentence</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="sentence" class="sentence-box"></div>
+
+    <textarea id="userInput" placeholder="Type the sentence here..."></textarea>
+
+    <div class="buttons">
+      <button class="check" onclick="checkAnswer()">Check Answer</button>
+      <button class="prev" onclick="prevSentence()">Previous</button>
+      <button class="next" onclick="nextSentence()">Next</button>
+      <button class="hide" onclick="toggleSentence()">Show / Hide</button>
+      <button class="clear" onclick="clearText()">Clear</button>
+    </div>
+
+    <div id="result" class="result">Result will show here.</div>
+    <div class="small">Tip: Punctuation and capital letters are ignored. Word spelling must be correct.</div>
+  </div>
+
+<script>
+const sentences = [
+  {
+    "no": 1,
+    "text": "Building trust is not something that can be achieved overnight."
+  },
+  {
+    "no": 2,
+    "text": "Certain scientific principles must be learned verbally or by a logical deduction."
+  },
+  {
+    "no": 3,
+    "text": "The economic strength of early Roman Republic will be examined."
+  },
+  {
+    "no": 4,
+    "text": "It may not be possible to solve the problem easily."
+  },
+  {
+    "no": 5,
+    "text": "One of the election promises is to decrease the income tax."
+  },
+  {
+    "no": 6,
+    "text": "Our professor is hosting the business development conference."
+  },
+  {
+    "no": 7,
+    "text": "Preparation is important to avoid mishaps in the lab."
+  },
+  {
+    "no": 8,
+    "text": "Students will focus on reporting news on the changing media world."
+  },
+  {
+    "no": 9,
+    "text": "Studies show there is a positive correlation between the two variables."
+  },
+  {
+    "no": 10,
+    "text": "The dance department stages elaborated performances each semester."
+  },
+  {
+    "no": 11,
+    "text": "The lecture tomorrow will discuss the educational policy of the United States."
+  },
+  {
+    "no": 12,
+    "text": "The other book isn't thorough but it's more insightful."
+  },
+  {
+    "no": 13,
+    "text": "The railway makes long-distance travel possible for everyone."
+  },
+  {
+    "no": 14,
+    "text": "There is a pharmacy on campus near the bookstore."
+  },
+  {
+    "no": 15,
+    "text": "There was a prize for the best student of the presentation."
+  },
+  {
+    "no": 16,
+    "text": "Traffic is the main cause of air pollution in many cities."
+  },
+  {
+    "no": 17,
+    "text": "You can use your laptops in the lecture."
+  },
+  {
+    "no": 18,
+    "text": "Check the website if you are looking for discounted textbooks."
+  },
+  {
+    "no": 19,
+    "text": "Our courses help to improve critical thinking and independent learning skills."
+  },
+  {
+    "no": 20,
+    "text": "Protective clothing must always be worn in the laboratory."
+  },
+  {
+    "no": 21,
+    "text": "Strangely, people are simultaneously impressed by and skeptical of statistics."
+  },
+  {
+    "no": 22,
+    "text": "The student advisor was aware that the lecture today has been canceled."
+  },
+  {
+    "no": 23,
+    "text": "The office hours will be changed from next term."
+  },
+  {
+    "no": 24,
+    "text": "Despite their differences, all forms of life share certain characteristics."
+  },
+  {
+    "no": 25,
+    "text": "The new media have transcended traditional national boundaries."
+  },
+  {
+    "no": 26,
+    "text": "They developed a unique approach to training their employees."
+  },
+  {
+    "no": 27,
+    "text": "The library will be closed for staff training tomorrow morning."
+  },
+  {
+    "no": 28,
+    "text": "Social media is criticized for causing internet addiction."
+  },
+  {
+    "no": 29,
+    "text": "Please make sure you choose a course that provides good career opportunities."
+  },
+  {
+    "no": 30,
+    "text": "The student shop sells a range of stationery."
+  },
+  {
+    "no": 31,
+    "text": "Sugar is a compound including carbon, hydrogen and oxygen atoms."
+  },
+  {
+    "no": 32,
+    "text": "Air pollution is a serious problem all over the world."
+  },
+  {
+    "no": 33,
+    "text": "Designers need to keep up with social trends."
+  },
+  {
+    "no": 34,
+    "text": "The course involves a combination of pure and applied mathematics."
+  },
+  {
+    "no": 35,
+    "text": "the digital camera has some advantages over traditional film."
+  },
+  {
+    "no": 36,
+    "text": "Philosophy uses logic and reason to analyze human experience."
+  },
+  {
+    "no": 37,
+    "text": "An effective business manager is always open to new ideas."
+  },
+  {
+    "no": 38,
+    "text": "When the root system of a plant fails, foliage suffers."
+  },
+  {
+    "no": 39,
+    "text": "The falling birth rate means the number of students drops."
+  },
+  {
+    "no": 40,
+    "text": "All industries consist of systems of inputs, processes, outputs and feedback.."
+  },
+  {
+    "no": 41,
+    "text": "Food containing ample calories provides little or no nutritional value."
+  },
+  {
+    "no": 42,
+    "text": "One student representative will be selected from each class."
+  },
+  {
+    "no": 43,
+    "text": "Optional tutorials are offered in the final week of a term."
+  },
+  {
+    "no": 44,
+    "text": "Mathematics provides a foundation for understanding and analyzing data."
+  },
+  {
+    "no": 45,
+    "text": "There was a lot of traffic this morning."
+  },
+  {
+    "no": 46,
+    "text": "Coursework gives students the chances to thoroughly explore the subject."
+  },
+  {
+    "no": 47,
+    "text": "The professor discussed the article yesterday in this class."
+  },
+  {
+    "no": 48,
+    "text": "The professor said biology is not the only one on the exam."
+  },
+  {
+    "no": 49,
+    "text": "A good research assistant is not afraid to ask questions."
+  },
+  {
+    "no": 50,
+    "text": "Maths uses numbers and shapes to solve problems."
+  },
+  {
+    "no": 51,
+    "text": "Much of the research is carried out in the laboratory."
+  },
+  {
+    "no": 52,
+    "text": "The content is to define the combination of math and philosophy."
+  },
+  {
+    "no": 53,
+    "text": "Please move us to the meeting room for the next hour."
+  },
+  {
+    "no": 54,
+    "text": "Participating in the class is the center of the course."
+  },
+  {
+    "no": 55,
+    "text": "In my opinion, this car should be repaired soon."
+  },
+  {
+    "no": 56,
+    "text": "A good architectural structure should be useful, durable, and beautiful."
+  },
+  {
+    "no": 57,
+    "text": "Education and training provide important skills for the labor force."
+  },
+  {
+    "no": 58,
+    "text": "Having enough sleep has many positive benefits."
+  },
+  {
+    "no": 59,
+    "text": "The professor will have a ... in the class."
+  },
+  {
+    "no": 60,
+    "text": "Graduates from this course typically pursue careers in the financial sector."
+  },
+  {
+    "no": 61,
+    "text": "The elective course introduces engineering students to construction practices and concepts."
+  },
+  {
+    "no": 62,
+    "text": "A visit to the designed museum is of great value."
+  },
+  {
+    "no": 63,
+    "text": "We encourage students to complete their applications before the deadline."
+  },
+  {
+    "no": 64,
+    "text": "He has landed a job in a very prestigious law firm."
+  },
+  {
+    "no": 65,
+    "text": "Your ideas have been discussed and debated in seminars and tutorials."
+  },
+  {
+    "no": 66,
+    "text": "Marine environments have been destroyed through pollution and unsustainable development."
+  },
+  {
+    "no": 67,
+    "text": "We study science to understand and appreciate the world around us."
+  },
+  {
+    "no": 68,
+    "text": "Please close the door behind you when you leave the room."
+  },
+  {
+    "no": 69,
+    "text": "It is a debate about the knowledge of values."
+  },
+  {
+    "no": 70,
+    "text": "Plants are the living things that can grow on land or in water."
+  },
+  {
+    "no": 71,
+    "text": "All of the assigments must be submitted in person to the faculty office"
+  },
+  {
+    "no": 72,
+    "text": "The opening hours of the library are reduced during summer."
+  },
+  {
+    "no": 73,
+    "text": "The application process may take longer than expected."
+  },
+  {
+    "no": 74,
+    "text": "You will acquire many skills during your academic studies."
+  },
+  {
+    "no": 75,
+    "text": "Geography is generally divided into two main branches: human and physical."
+  },
+  {
+    "no": 76,
+    "text": "Organizational failure is considered from various perspectives in academic literature."
+  },
+  {
+    "no": 77,
+    "text": "Parents' talk to children tends to be simplified."
+  },
+  {
+    "no": 78,
+    "text": "Sea levels are expected to rise during the next century."
+  },
+  {
+    "no": 79,
+    "text": "Students have the options to live in college residencess or apartments."
+  },
+  {
+    "no": 80,
+    "text": "The cafeteria features sandwiches, salads, soup, fish and chicken."
+  },
+  {
+    "no": 81,
+    "text": "The director of the gallery was grateful for anonymous donation."
+  },
+  {
+    "no": 82,
+    "text": "Those who are considering a career in marketing should attend the talk."
+  },
+  {
+    "no": 83,
+    "text": "I thought it was through the small meeting room."
+  },
+  {
+    "no": 84,
+    "text": "Students should leaves their bags on the tables by the door."
+  },
+  {
+    "no": 85,
+    "text": "The rising of the sea level indicates climate change."
+  },
+  {
+    "no": 86,
+    "text": "All new medical school students must attend the talk about optional courses."
+  },
+  {
+    "no": 87,
+    "text": "There is an accounting assignment for finance students."
+  },
+  {
+    "no": 88,
+    "text": "Visual aids can be really helpful when you are revising."
+  },
+  {
+    "no": 89,
+    "text": "The glittering of the lake surface camouflages the fish."
+  },
+  {
+    "no": 90,
+    "text": "The assessment procedure has been altered slightly since last year."
+  },
+  {
+    "no": 91,
+    "text": "The contract will be signed by the owner of the company."
+  },
+  {
+    "no": 92,
+    "text": "Scientists were unsure when the early man first left Africa."
+  },
+  {
+    "no": 93,
+    "text": "You do not need to have specialist knowledge to enjoy this book."
+  },
+  {
+    "no": 94,
+    "text": "Many food crops require a large amount of water and fertilizer."
+  },
+  {
+    "no": 95,
+    "text": "Medical researchers have focused on the causes of diseases and treatments."
+  },
+  {
+    "no": 96,
+    "text": "Please confirm that you have received the textbook"
+  },
+  {
+    "no": 97,
+    "text": "The news will not be received until the following week."
+  },
+  {
+    "no": 98,
+    "text": "linguistics is the scientific study and analysis of language."
+  },
+  {
+    "no": 99,
+    "text": "This class will look at the structure of the essay."
+  },
+  {
+    "no": 100,
+    "text": "Auditions for the university choir will be held next week."
+  },
+  {
+    "no": 101,
+    "text": "Calculators may not be used in the exam."
+  },
+  {
+    "no": 102,
+    "text": "Calculators allow us to add numbers without making mistakes."
+  },
+  {
+    "no": 103,
+    "text": "Speak to your tutor if you need further assistance."
+  },
+  {
+    "no": 104,
+    "text": "His appointment as Minister of culture was seen as a demotion."
+  },
+  {
+    "no": 105,
+    "text": "The area has a wide variety of underwater habitats and species."
+  },
+  {
+    "no": 106,
+    "text": "Salt is produced from the seawater or extracted from the ground."
+  },
+  {
+    "no": 107,
+    "text": "The printers automatically print two sides of each page."
+  },
+  {
+    "no": 108,
+    "text": "The reception staff can give advice on renting private accommodation."
+  },
+  {
+    "no": 109,
+    "text": "Human beings compete with other living things for resources and space."
+  },
+  {
+    "no": 110,
+    "text": "The north campus car park could be closed on Sunday."
+  },
+  {
+    "no": 111,
+    "text": "Please note that the seminar has now been canceled."
+  },
+  {
+    "no": 112,
+    "text": "His analysis study appears to be based on the false permise."
+  },
+  {
+    "no": 113,
+    "text": "New media journalism is an exciting area of study."
+  },
+  {
+    "no": 114,
+    "text": "The archeologist's new discoveries stand out in previously overlooked foundations."
+  },
+  {
+    "no": 115,
+    "text": "In this language course , we focus on fluency and accuracy."
+  },
+  {
+    "no": 116,
+    "text": "The faculty staff are very approachable, helpful and extremely friendly."
+  },
+  {
+    "no": 117,
+    "text": "The professor took year off to work on her book,"
+  },
+  {
+    "no": 118,
+    "text": "Collaboration between department is feature of successful companies."
+  },
+  {
+    "no": 119,
+    "text": "Some departments have their own specialist book collections."
+  },
+  {
+    "no": 120,
+    "text": "The chemistry building is located near the entrance of the campus."
+  },
+  {
+    "no": 121,
+    "text": "The island is located at the south end of the bay."
+  },
+  {
+    "no": 122,
+    "text": "There are some doubts about whether these events actually occurred."
+  },
+  {
+    "no": 123,
+    "text": "The economic predictions turned out to be incorrect."
+  },
+  {
+    "no": 124,
+    "text": "The college operates a system of continuous assessment."
+  },
+  {
+    "no": 125,
+    "text": "Technology has changed the media we both used and studied."
+  },
+  {
+    "no": 126,
+    "text": "There have been many changes recently in the mathematics department."
+  },
+  {
+    "no": 127,
+    "text": "Gravity is the force that attracts two bodies toward one another."
+  },
+  {
+    "no": 128,
+    "text": "Rising sea temperature is a sign of climate change."
+  },
+  {
+    "no": 129,
+    "text": "Enrolling in a second major will increase your career options."
+  },
+  {
+    "no": 130,
+    "text": "Every students has a regular meeting with his or her personal tutor."
+  },
+  {
+    "no": 131,
+    "text": "More research is needed before any definitive conclusion is drawn."
+  },
+  {
+    "no": 132,
+    "text": "A laptop computer has been found in the biology lab."
+  },
+  {
+    "no": 133,
+    "text": "Most of the lectures begin promptly, so do not be late."
+  },
+  {
+    "no": 134,
+    "text": "Art is an expression of creative skills and imagination."
+  },
+  {
+    "no": 135,
+    "text": "Remember, the prestigious student stewardship has strict eligibility criteria."
+  },
+  {
+    "no": 136,
+    "text": "Some economists argue that the entire financial system is fatally flawed."
+  },
+  {
+    "no": 137,
+    "text": "Novelists write about the best things that they know."
+  },
+  {
+    "no": 138,
+    "text": "The article considers the leisure habits of teenagers in rural areas."
+  },
+  {
+    "no": 139,
+    "text": "Daily practice can build confidences and improve skills."
+  },
+  {
+    "no": 140,
+    "text": "All dissertations must be accompanied by a submission form."
+  },
+  {
+    "no": 141,
+    "text": "A massive accumulation of data was converted into a communicable argument."
+  },
+  {
+    "no": 142,
+    "text": "If finance is a cause of concern, scholarships may be available."
+  },
+  {
+    "no": 143,
+    "text": "We have not yet achieved equality in our society."
+  },
+  {
+    "no": 144,
+    "text": "A good abstract hightlights the key points of your paper."
+  },
+  {
+    "no": 145,
+    "text": "If you need additional help, please visit the university resources center."
+  },
+  {
+    "no": 146,
+    "text": "Classical mechanics is sometimes considered as a branch of applied mathematics."
+  },
+  {
+    "no": 147,
+    "text": "The rising inflation rate indicates a decrease in demand for consumer products."
+  },
+  {
+    "no": 148,
+    "text": "Listening is the key skill needed to succeed in this course."
+  },
+  {
+    "no": 149,
+    "text": "Distance learning allows you to develop a career around your commitments."
+  },
+  {
+    "no": 150,
+    "text": "Castles were designed to intimidate both local people and the enemies."
+  },
+  {
+    "no": 151,
+    "text": "The library cafe is on the third floor."
+  },
+  {
+    "no": 152,
+    "text": "Safety glasses should be worn while doing experiments in the lab."
+  },
+  {
+    "no": 153,
+    "text": "The lecture will cover the reason of climate change."
+  },
+  {
+    "no": 154,
+    "text": "Our aim is to reduce the risks that people take."
+  },
+  {
+    "no": 155,
+    "text": "Our view is that all the educational reforms have been inadequately implemented."
+  },
+  {
+    "no": 156,
+    "text": "Relying on natural ability will not get you far in science."
+  },
+  {
+    "no": 157,
+    "text": "An introduction is an essential element of presentation."
+  },
+  {
+    "no": 158,
+    "text": "The archeologists were astonished by the unexpected previously overlooked foundations."
+  },
+  {
+    "no": 159,
+    "text": "The study center in the library has all the latest technologies."
+  },
+  {
+    "no": 160,
+    "text": "We should never underestimate the power of creative design."
+  },
+  {
+    "no": 161,
+    "text": "A new collection of articles has just been pulished."
+  },
+  {
+    "no": 162,
+    "text": "At university students can make friends for life."
+  },
+  {
+    "no": 163,
+    "text": "Farming is affected by changes in seasonal patterns."
+  },
+  {
+    "no": 164,
+    "text": "We were discussing the methods used by criminals to commit crimes."
+  },
+  {
+    "no": 165,
+    "text": "Some students were absent due to the train delay."
+  },
+  {
+    "no": 166,
+    "text": "The tutor has canceled the lecture for geography students."
+  },
+  {
+    "no": 167,
+    "text": "All accounting students must submit their dissertations before the end of the week."
+  },
+  {
+    "no": 168,
+    "text": "Students should register to gain access to the library printers."
+  },
+  {
+    "no": 169,
+    "text": "Plastic pollution is very dangerous to ocean lives."
+  },
+  {
+    "no": 170,
+    "text": "We should always use recyclable plastic and glass bottles."
+  },
+  {
+    "no": 171,
+    "text": "There is a widely believed perception that engineering is for boys."
+  },
+  {
+    "no": 172,
+    "text": "There is a clear need for further research in this field."
+  },
+  {
+    "no": 173,
+    "text": "Resources and materials are on hold at the library reference desk."
+  },
+  {
+    "no": 174,
+    "text": "The universities provide excellent leisure facilities for students and staff."
+  },
+  {
+    "no": 175,
+    "text": "A good academic paper should present a clear argument."
+  },
+  {
+    "no": 176,
+    "text": "The student union hosts a variety of social events."
+  },
+  {
+    "no": 177,
+    "text": "You should have awareness of how the business operates globally."
+  },
+  {
+    "no": 178,
+    "text": "The results of the study underscore the importance of the discoveries from early detection."
+  },
+  {
+    "no": 179,
+    "text": "Momentum is defined as the combination of mass and velocity."
+  },
+  {
+    "no": 180,
+    "text": "The educational level is found to be related to social and economic background."
+  },
+  {
+    "no": 181,
+    "text": "You need to make sure that all your essays are handed in on time."
+  },
+  {
+    "no": 182,
+    "text": "Essays and assignments spread out across the academic year."
+  },
+  {
+    "no": 183,
+    "text": "We have sufficient methods to study brain activity."
+  },
+  {
+    "no": 184,
+    "text": "Social psychology is concerned with the understanding of human behavior."
+  },
+  {
+    "no": 185,
+    "text": "Important details from the argument are missing in the summary."
+  },
+  {
+    "no": 186,
+    "text": "The history of the university is a long and interesting one."
+  },
+  {
+    "no": 187,
+    "text": "The commissioner will apportion the funds among all the sovereignties."
+  },
+  {
+    "no": 188,
+    "text": "You will be tested via continuous assessment and examinations."
+  },
+  {
+    "no": 189,
+    "text": "Water filters on campus will discourage the unnecessary use of plastic bottles."
+  },
+  {
+    "no": 190,
+    "text": "The subject is complex and difficult to explain."
+  },
+  {
+    "no": 191,
+    "text": "The most popular courses still have a few places left."
+  },
+  {
+    "no": 192,
+    "text": "The rising temperature is changing the wildlife population."
+  },
+  {
+    "no": 193,
+    "text": "Continuing students will be sent necessary application forms."
+  },
+  {
+    "no": 194,
+    "text": "Requests for late applications will not be accepted under any circumstances."
+  },
+  {
+    "no": 195,
+    "text": "People have been dependent on using phones in their everyday life."
+  },
+  {
+    "no": 196,
+    "text": "The collapse of the housing market has caused recessions throughout the world."
+  },
+  {
+    "no": 197,
+    "text": "Accountancy students need to submit their dissertations this week."
+  },
+  {
+    "no": 198,
+    "text": "Time and distance are used to calculate speed."
+  },
+  {
+    "no": 199,
+    "text": "Scientists have found all parts of science today."
+  },
+  {
+    "no": 200,
+    "text": "Public perception about biotechnology is crucial for developing scientific consensus."
+  },
+  {
+    "no": 201,
+    "text": "Students who are successful have a good strategy for learning."
+  },
+  {
+    "no": 202,
+    "text": "Today's lecture is canceled because the lecturer is ill."
+  },
+  {
+    "no": 203,
+    "text": "Good research delivers practical benefit to real people."
+  },
+  {
+    "no": 204,
+    "text": "Before attending the lecture, you must register online or by post."
+  },
+  {
+    "no": 205,
+    "text": "This course provides the opportunity to get valuable industry experience."
+  },
+  {
+    "no": 206,
+    "text": "Artists need to make their works both original and accessible."
+  },
+  {
+    "no": 207,
+    "text": "All answers must be thoroughly researched and supported by relevant theories."
+  },
+  {
+    "no": 208,
+    "text": "Read the student safety instructions before using any equipment in the workshops."
+  },
+  {
+    "no": 209,
+    "text": "Scientists were unsure when the early man left Africa."
+  },
+  {
+    "no": 210,
+    "text": "These three separate resources are not enough for this assessment."
+  },
+  {
+    "no": 211,
+    "text": "Students should take the training course to use the gym."
+  },
+  {
+    "no": 212,
+    "text": "The article illuminates the intricate relationship between culture and language."
+  },
+  {
+    "no": 213,
+    "text": "The department works closely with its partners in the business community."
+  },
+  {
+    "no": 214,
+    "text": "The employment rate steadily increased over the last year."
+  },
+  {
+    "no": 215,
+    "text": "Our study program equips students with essential skills for university."
+  },
+  {
+    "no": 216,
+    "text": "Participants recorded their sleep hours in the journals."
+  },
+  {
+    "no": 217,
+    "text": "Please confirm your essay topic before the deadline."
+  },
+  {
+    "no": 218,
+    "text": "Effective communication is the key to becoming a successful manager."
+  },
+  {
+    "no": 219,
+    "text": "There will be a quiz next week."
+  },
+  {
+    "no": 220,
+    "text": "Measures must be taken to prevent unemployment rate from increasing."
+  },
+  {
+    "no": 221,
+    "text": "The reception staff can give information of lending and printing."
+  },
+  {
+    "no": 222,
+    "text": "The university auditorium is around the corner."
+  },
+  {
+    "no": 223,
+    "text": "You do not need to have specialist knowledge to be able to read the book."
+  },
+  {
+    "no": 224,
+    "text": "The exam will not be posted until further notice."
+  },
+  {
+    "no": 225,
+    "text": "The next lecture will take place at a different location."
+  }
+];
+
+let currentIndex = 0;
+
+function cleanText(text) {
+  return text
+    .toLowerCase()
+    .replace(/[.,!?;:"'()\[\]]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function displaySentence() {
+  const mode = document.getElementById("mode").value;
+  const item = sentences[currentIndex];
+
+  document.getElementById("currentNo").innerText = item.no;
+  document.getElementById("totalNo").innerText = sentences.length;
+  document.getElementById("jumpNo").value = item.no;
+
+  if (mode === "hide") {
+    document.getElementById("sentence").innerText = "Sentence hidden. Listen/remember and type your answer.";
+  } else {
+    document.getElementById("sentence").innerText = item.text;
+  }
+
+  document.getElementById("userInput").value = "";
+  document.getElementById("result").innerHTML = "Result will show here.";
+}
+
+function checkAnswer() {
+  const correctText = sentences[currentIndex].text;
+  const typedText = document.getElementById("userInput").value;
+
+  const correctWords = cleanText(correctText).split(" ").filter(Boolean);
+  const typedWords = cleanText(typedText).split(" ").filter(Boolean);
+
+  let right = 0;
+  let wrong = 0;
+  let missing = 0;
+  let review = "";
+
+  for (let i = 0; i < correctWords.length; i++) {
+    if (typedWords[i] === correctWords[i]) {
+      right++;
+      review += `<span class="right">${correctWords[i]}</span> `;
+    } else if (typedWords[i] === undefined) {
+      missing++;
+      review += `<span class="missing">${correctWords[i]}</span> `;
+    } else {
+      wrong++;
+      review += `<span class="wrong">${correctWords[i]}</span> `;
+    }
+  }
+
+  const extra = Math.max(0, typedWords.length - correctWords.length);
+  const totalMistakes = wrong + missing + extra;
+  const percentage = correctWords.length ? Math.round((right / correctWords.length) * 100) : 0;
+
+  let extraText = "";
+  if (extra > 0) {
+    extraText = `<p class="extra">Extra words typed: ${extra}</p>`;
+  }
+
+  document.getElementById("result").innerHTML = `
+    <p class="right">Right words: ${right}</p>
+    <p class="wrong">Wrong words: ${wrong}</p>
+    <p class="missing">Missing words: ${missing}</p>
+    ${extraText}
+    <p><b>Total mistakes:</b> ${totalMistakes}</p>
+    <p><b>Score:</b> ${percentage}%</p>
+    <hr>
+    <p><b>Correct sentence review:</b></p>
+    <p>${review}</p>
+    <p><b>Your answer:</b> ${typedText || "No answer typed"}</p>
+  `;
+}
+
+function nextSentence() {
+  currentIndex++;
+  if (currentIndex >= sentences.length) currentIndex = 0;
+  displaySentence();
+}
+
+function prevSentence() {
+  currentIndex--;
+  if (currentIndex < 0) currentIndex = sentences.length - 1;
+  displaySentence();
+}
+
+function jumpSentence() {
+  const no = parseInt(document.getElementById("jumpNo").value, 10);
+  if (no >= 1 && no <= sentences.length) {
+    currentIndex = no - 1;
+    displaySentence();
+  } else {
+    alert("Please enter a number from 1 to " + sentences.length);
+  }
+}
+
+function toggleSentence() {
+  const mode = document.getElementById("mode");
+  mode.value = mode.value === "show" ? "hide" : "show";
+  const typed = document.getElementById("userInput").value;
+  displaySentence();
+  document.getElementById("userInput").value = typed;
+}
+
+function clearText() {
+  document.getElementById("userInput").value = "";
+  document.getElementById("result").innerHTML = "Result will show here.";
+}
+
+displaySentence();
+</script>
+</body>
+</html>
