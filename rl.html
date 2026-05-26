@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Retell Lecture Practice</title>
+  <style>
+    body { font-family: Arial; background: #f4f4f4; padding: 30px; }
+    .box { background: white; max-width: 900px; margin: auto; padding: 25px; border-radius: 10px; }
+    #timer { font-size: 32px; color: red; font-weight: bold; }
+    textarea { width: 100%; height: 220px; font-size: 18px; padding: 10px; }
+    button { padding: 12px 25px; margin-top: 10px; font-size: 16px; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+<div class="box">
+  <h2>RETELL LECTURE/h2>
+
+  <p><b>Time Left:</b> <span id="timer">02:00</span></p>
+
+  <h3>Template:</h3>
+  <p>
+    The lecture was about ________________.<br>
+    Firstly, the speaker talks about ________________.<br>
+    Moreover, he clearly discussed that ________________.<br>
+    Furthermore, he mentioned ________________.<br>
+    In addition, he sheds light on ________________.<br>
+    And then, he informed us about ________________.<br>
+    The audio also asserted that ________________.<br>
+    Overall, the speaker concluded by saying that ________________.
+  </p>
+
+  <h3>Type Your Answer:</h3>
+  <textarea id="answer" placeholder="Type your answer here..."></textarea>
+
+  <br>
+  <button onclick="checkAnswer()">Check</button>
+  <button onclick="retry()">Retry</button>
+
+  <h3>Result:</h3>
+  <p id="result"></p>
+</div>
+
+<script>
+let time = 120;
+let timer = document.getElementById("timer");
+
+let countdown = setInterval(function () {
+  let minutes = Math.floor(time / 60);
+  let seconds = time % 60;
+
+  timer.textContent =
+    String(minutes).padStart(2, "0") + ":" + String(seconds).padStart(2, "0");
+
+  if (time <= 0) {
+    clearInterval(countdown);
+    document.getElementById("answer").disabled = true;
+    checkAnswer();
+  }
+
+  time--;
+}, 1000);
+
+function checkAnswer() {
+  let text = document.getElementById("answer").value.trim();
+
+  let words = text.split(/\s+/).filter(word => word.length > 0);
+  let wordCount = words.length;
+
+  document.getElementById("result").innerHTML =
+    "<b>Total Words Typed:</b> " + wordCount + "<br>" +
+    "<b>Status:</b> " + (wordCount > 0 ? "Completed" : "No answer typed");
+}
+
+function retry() {
+  location.reload();
+}
+</script>
+
+</body>
+</html>
