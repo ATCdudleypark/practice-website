@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Spelling Test with Hindi Meaning</title>
+<style>
+  body{font-family:Arial, sans-serif;background:#eef3f8;margin:0;padding:18px;color:#1d2733}
+  .app{max-width:920px;margin:auto;background:#fff;border-radius:16px;padding:22px;box-shadow:0 8px 25px rgba(0,0,0,.08)}
+  h1{text-align:center;margin:0 0 8px}
+  .sub{text-align:center;color:#64748b;margin-bottom:18px}
+  .stats{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:18px}
+  .card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:12px;text-align:center}
+  .num{font-size:24px;font-weight:700;color:#0f172a}
+  .label{font-size:12px;color:#64748b}
+  .wordBox{background:#f8fafc;border:2px solid #dbeafe;border-radius:16px;padding:24px;text-align:center;margin:18px 0}
+  #word{font-size:38px;font-weight:800;letter-spacing:1px}
+  #meaning{font-size:21px;color:#166534;margin-top:10px;min-height:28px}
+  input{width:100%;box-sizing:border-box;padding:15px;font-size:22px;border:2px solid #cbd5e1;border-radius:12px;text-align:center}
+  input.error{border-color:#dc2626;background:#fff1f2}
+  .buttons{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+  button{border:0;border-radius:10px;padding:12px 16px;font-weight:700;cursor:pointer;background:#2563eb;color:white}
+  button.secondary{background:#475569} button.danger{background:#dc2626} button.good{background:#16a34a}
+  #message{font-size:18px;font-weight:700;margin-top:14px;min-height:26px;text-align:center}
+  .ok{color:#16a34a} .bad{color:#dc2626}
+  .progressOuter{height:18px;background:#e2e8f0;border-radius:99px;overflow:hidden;margin-top:8px}
+  #progressBar{height:100%;width:0%;background:#22c55e;transition:.3s}
+  .list{margin-top:18px;background:#f8fafc;border-radius:12px;padding:12px;max-height:190px;overflow:auto;font-size:14px}
+  .small{font-size:13px;color:#64748b;line-height:1.5}
+  @media(max-width:720px){.stats{grid-template-columns:repeat(2,1fr)}#word{font-size:30px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <h1>Spelling Test Practice</h1>
+  <div class="sub">Word + Hindi meaning + full progress tracking</div>
+  <div class="stats">
+    <div class="card"><div class="num" id="total">0</div><div class="label">Total Words</div></div>
+    <div class="card"><div class="num" id="completed">0</div><div class="label">Completed</div></div>
+    <div class="card"><div class="num" id="pending">0</div><div class="label">Pending</div></div>
+    <div class="card"><div class="num" id="correct">0</div><div class="label">Correct</div></div>
+    <div class="card"><div class="num" id="wrong">0</div><div class="label">Wrong</div></div>
+    <div class="card"><div class="num" id="retry">0</div><div class="label">Retry</div></div>
+  </div>
+  <div class="progressOuter"><div id="progressBar"></div></div>
+  <div class="wordBox">
+    <div id="word"></div>
+    <div id="meaning">Hindi meaning loading...</div>
+  </div>
+  <input id="answer" placeholder="Type spelling here..." autocomplete="off" />
+  <div class="buttons">
+    <button onclick="checkAnswer()">Check</button>
+    <button class="good" onclick="nextWord()">Next</button>
+    <button class="secondary" onclick="speakWord()">Listen</button>
+    <button class="secondary" onclick="showPending()">Show Pending</button>
+    <button class="danger" onclick="resetProgress()">Reset Progress</button>
+  </div>
+  <div id="message"></div>
+  <div class="list" id="wordList"></div>
+  <p class="small"><b>Tracking rule:</b> A word becomes completed only after correct spelling. Wrong answer increases Wrong and Retry count. Progress is saved in this browser using localStorage.</p>
+</div>
+<script>
+const words = ["abrupt", "absolute", "academic", "academy", "accessible", "accommodate", "account", "accurate", "acoustics", "addition", "advance", "adverse", "advertise", "advocate", "aesthetic", "aggressive", "agricultural", "agriculture", "aircraft", "airplane", "algorithm", "almond", "alternative", "amend", "amongst", "analyse", "analyst", "anniversary", "antiquarian", "apparent", "appendix", "appetite", "application", "appoint", "approve", "archaeologist", "archaeology", "architecture", "artefact", "artificial", "assessment", "assignment", "assistance", "associate", "association", "astronomer", "astronomical", "atmosphere", "atomic", "attendant", "audience", "auditory", "aurora", "auroral", "automaker", "automobile", "awesome", "backward", "bargain", "barrier", "basically", "battery", "beleaguer", "benefit", "bias", "binary", "biofuel", "biological", "biologist", "bounty", "bracket", "brainwave", "brood", "bulb", "bulk", "canyon", "capture", "carbon", "celebrate", "celebration", "census", "characterisation", "chemical", "circulation", "clump", "cluster", "coalition", "colleague", "collection", "collector", "colony", "combination", "combo", "compatible", "compensate", "complain", "concentrate", "concept", "conclude", "confess", "confidence", "confidential", "consider", "consideration", "consonant", "consume", "consumer", "contain", "boom", "boredom", "boundary", "breadth", "breed", "broadcast", "bureau", "cardiologist", "carmaker", "categorise", "centrifuge", "champagne", "channel", "claim", "clamour", "classical", "cocoon", "collaboration", "collaborative", "collide", "collision", "colloquial", "commercial", "common", "company", "complexity", "compliance", "compute", "conduct", "confection", "conference", "Congress", "consensus", "conservation", "constant", "construction", "consultant", "contract", "contribute", "convene", "biology", "bloom", "blunt", "cosmic", "counterintuitive", "coverage", "croft", "cruise", "crustacean", "current", "dater", "database", "dam", "defensible", "deficiency", "definition", "department", "depict", "depiction", "desirable", "detect", "detector", "disappear", "discern", "discipline", "distance", "distinctive", "distinguish", "dolphin", "dominate", "downside", "economics", "eclipse", "echo", "electrical", "electromagnetic", "electron", "elimination", "emission", "employment", "coral", "cord", "core", "criminology", "critical", "criticism", "cultural", "curator", "curious", "deafen", "debris", "declare", "deform", "delight", "deliver", "depth", "derivative", "desirability", "digital", "dimension", "dioxide", "disorder", "disrupt", "dissatisfaction", "district", "disturb", "document", "drainage", "dramatic", "drought", "economist", "economy", "electric", "electronic", "element", "eliminate", "conventional", "conversational", "coordinate", "entrepreneur", "environment", "epidemic", "essential", "establish", "estimate", "evident", "exceptional", "excess", "expectation", "experiment", "explanation", "external", "extreme", "engineer", "engineering", "enlarge", "equation", "equity", "eradicate", "European", "eventual", "evidence", "executive", "exert", "expansion", "exploration", "explore", "extensive", "fastener", "feather", "feature", "feedback", "financial", "firm", "flake", "flexible", "flick", "float", "flush", "folk", "foreshadow", "forge", "forgive", "formalistic", "fort", "Forth", "fossilise", "foyer", "fracture", "fragile", "frequency", "frontier", "frustrate", "fund", "fundamental", "further", "galaxy", "gallery", "gasoline", "generation", "generator", "genome", "genuine", "glean", "glimpse", "grain", "grin", "encompass", "energetic", "engagement", "justice", "judgement", "journal", "habitat", "hemisphere", "herd", "hind", "historian", "historic", "hive", "holistic", "honour", "hub", "humanity", "hydrogen", "iceberg", "identical", "identify", "illegal", "immigrant", "impression", "incredible", "indicate", "indirect", "individual", "industrial", "infect", "inflection", "inject", "innovation", "innovator", "institution", "instruct", "insurance", "integrate", "intend", "interact", "interface", "interpersonal", "interpret", "interpretation", "interpreter", "interstellar", "inundate", "investigation", "investment", "investor", "involve", "irrelevant", "irrigate", "landowner", "landscape", "Latino", "lecture", "leftover", "legislation", "legitimate", "liquid", "lizard", "loose", "luxury", "manipulation", "manufacture", "manuscript", "matchstick", "maternal", "measure", "microphone", "migrant", "migrate", "mite", "mode", "molecular", "movement", "multifaceted", "mutate", "negative", "narrowness", "nanometre", "northwest", "notion", "observer", "observe", "objective", "offset", "operation", "operational", "ore", "organisation", "origin", "outward", "overseas", "overturn", "management", "mandate", "manifesto", "margin", "marine", "massive", "mechanism", "merge", "merger", "mimic", "minimal", "mistake", "monetary", "moonshot", "motivational", "mysterious", "neighbour", "neuron", "nonpartisan", "obstruct", "oceanographer", "odd", "opportunity", "optimise", "optimistic", "original", "originate", "outgo", "package", "panel", "Parliament", "partial", "particle", "particular", "macromolecular", "majority", "mammal", "pertain", "pesticide", "phenomenon", "pilgrim", "platform", "plunge", "politics", "pollinator", "pollution", "poverty", "powerful", "practise", "preparation", "prescribe", "prestige", "production", "productive", "profession", "promote", "promotion", "property", "pseudo", "publish", "pulse", "quantity", "quality", "pend", "perch", "permanent", "photograph", "phrenetic", "physician", "polar", "political", "politician", "portrait", "pose", "potential", "predicament", "predict", "preliminary", "prestigious", "previous", "problematic", "professor", "professorship", "program", "proposal", "propose", "prove", "pun", "pursuit", "puzzle", "radiant", "radiation", "radical", "rationality", "realist", "realize", "rear", "reassess", "rebound", "rebuild", "recession", "recognise", "reconstruct", "recorder", "recovery", "refine", "regulation", "reimagine", "release", "relevant", "repetition", "patch", "patriotism", "pedal", "resident", "resource", "respond", "rhythmical", "rivet", "robust", "sacrifice", "satellite", "scale", "scotch", "script", "section", "sequence", "sequester", "settlement", "significant", "signifier", "simulate", "slam", "sleek", "slump", "software", "solution", "sparkiness", "specific", "spew", "spike", "staircase", "stale", "starvation", "stream", "stressful", "structure", "sunflower", "surround", "survival", "symptom", "system", "representative", "reproduce", "researcher", "responsive", "restoration", "restrict", "rough", "scarlet", "scatter", "scientist", "sediment", "sensitive", "sensitivity", "sexton", "shock", "wave", "signal", "situate", "skeleton", "sketch", "smartphone", "sober", "socialise", "spate", "spatial", "species", "spinal", "sponsor", "stabilise", "statistics", "stimulate", "strategy", "struggle", "submerge", "subscribe", "survive", "sustainable", "switch", "replace", "reposition", "represent", "thoughtful", "throughout", "tint", "trade-off", "trait", "transcend", "treatable", "tremendous", "tropical", "unattractive", "unashamed", "ultimate", "unimaginative", "universe", "university", "unravel", "unusable", "unweldable", "utter", "temperature", "temporary", "tend", "toolkit", "totality", "toxic", "transform", "transition", "transmit", "tune", "uncover", "undefined", "unemployment", "unmix", "unpopulated", "unpublished", "uptick", "upwards", "urgency", "vacuum", "vampire", "variety", "various", "vehicle", "vernacular", "vessel", "vibration", "violence", "visible", "vision", "visualisation", "visualize", "volume", "weld", "wilderness", "wingless", "worksheet", "wrap", "tariff", "technique", "telescope", "yawn"];
+const localMeanings = {"abrupt": "अचानक / अकस्मात", "absolute": "पूर्ण / निश्चित", "academic": "शैक्षणिक", "academy": "अकादमी", "accessible": "सुलभ / पहुँच योग्य", "accommodate": "समायोजित करना", "account": "खाता / विवरण", "accurate": "सटीक", "acoustics": "ध्वनि-विज्ञान", "addition": "जोड़ / अतिरिक्त", "advance": "आगे बढ़ना / अग्रिम", "adverse": "प्रतिकूल", "advertise": "विज्ञापन देना", "advocate": "समर्थन करना / वकील", "aesthetic": "सौंदर्य संबंधी", "aggressive": "आक्रामक", "agricultural": "कृषि संबंधी", "agriculture": "कृषि", "aircraft": "विमान", "airplane": "हवाई जहाज", "algorithm": "कलन विधि", "almond": "बादाम", "alternative": "विकल्प", "amend": "संशोधन करना", "amongst": "के बीच", "analyse": "विश्लेषण करना", "analyst": "विश्लेषक", "anniversary": "वर्षगांठ", "apparent": "स्पष्ट", "appendix": "परिशिष्ट / अपेंडिक्स", "appetite": "भूख", "application": "आवेदन / अनुप्रयोग", "appoint": "नियुक्त करना", "approve": "स्वीकृत करना", "architecture": "वास्तुकला", "artificial": "कृत्रिम", "assessment": "मूल्यांकन", "assignment": "कार्य / असाइनमेंट", "assistance": "सहायता", "associate": "संबंधित करना / सहयोगी", "association": "संघ / संबंध", "atmosphere": "वातावरण", "atomic": "परमाणु संबंधी", "audience": "दर्शक / श्रोता", "automobile": "मोटर वाहन", "awesome": "बहुत अच्छा / अद्भुत", "backward": "पीछे की ओर / पिछड़ा", "bargain": "सौदा / मोलभाव", "barrier": "बाधा", "basically": "मूल रूप से", "battery": "बैटरी", "benefit": "लाभ", "bias": "पक्षपात", "binary": "द्विआधारी", "biological": "जैविक", "biology": "जीव विज्ञान", "bloom": "खिलना", "blunt": "कुंद / सीधा", "boom": "तेज़ वृद्धि / धमाका", "boredom": "ऊब", "boundary": "सीमा", "brainwave": "अचानक विचार", "breadth": "चौड़ाई", "broadcast": "प्रसारण", "bureau": "कार्यालय", "canyon": "घाटी", "capture": "पकड़ना", "carbon": "कार्बन", "celebrate": "मनाना", "celebration": "उत्सव", "census": "जनगणना", "chemical": "रासायनिक", "circulation": "परिसंचरण / प्रसार", "cluster": "समूह", "coalition": "गठबंधन", "colleague": "सहकर्मी", "collection": "संग्रह", "collector": "संग्राहक", "colony": "उपनिवेश / बस्ती", "combination": "संयोजन", "compatible": "अनुकूल", "compensate": "क्षतिपूर्ति करना", "complain": "शिकायत करना", "concentrate": "ध्यान केंद्रित करना", "concept": "अवधारणा", "conclude": "निष्कर्ष निकालना", "confidence": "आत्मविश्वास", "confidential": "गोपनीय", "consider": "विचार करना", "consideration": "विचार / ध्यान", "consume": "उपभोग करना", "consumer": "उपभोक्ता", "contain": "शामिल होना", "contract": "अनुबंध", "contribute": "योगदान देना", "conventional": "परंपरागत", "coordinate": "समन्वय करना", "coral": "मूंगा", "core": "मुख्य भाग", "coverage": "कवरेज / आच्छादन", "critical": "महत्वपूर्ण / आलोचनात्मक", "criticism": "आलोचना", "cultural": "सांस्कृतिक", "curious": "जिज्ञासु", "current": "वर्तमान", "database": "डेटाबेस", "declare": "घोषित करना", "definition": "परिभाषा", "department": "विभाग", "depict": "चित्रित करना", "desirable": "वांछनीय", "detect": "पता लगाना", "discipline": "अनुशासन / विषय", "distance": "दूरी", "distinctive": "विशिष्ट", "distinguish": "अंतर करना", "document": "दस्तावेज़", "dramatic": "नाटकीय", "drought": "सूखा", "economics": "अर्थशास्त्र", "economist": "अर्थशास्त्री", "economy": "अर्थव्यवस्था", "electric": "विद्युत", "electrical": "विद्युत संबंधी", "electronic": "इलेक्ट्रॉनिक", "element": "तत्व", "eliminate": "हटाना", "employment": "रोज़गार", "engineer": "इंजीनियर", "engineering": "इंजीनियरिंग", "environment": "पर्यावरण", "epidemic": "महामारी", "equation": "समीकरण", "equity": "समानता / हिस्सेदारी", "essential": "आवश्यक", "establish": "स्थापित करना", "estimate": "अनुमान", "evidence": "सबूत", "evident": "स्पष्ट", "exceptional": "असाधारण", "excess": "अधिकता", "expectation": "अपेक्षा", "experiment": "प्रयोग", "explanation": "व्याख्या", "external": "बाहरी", "extreme": "अत्यधिक", "feature": "विशेषता", "feedback": "प्रतिक्रिया", "financial": "वित्तीय", "firm": "कंपनी / मजबूत", "flexible": "लचीला", "formalistic": "औपचारिकतावादी", "frequency": "आवृत्ति", "frontier": "सीमा / अग्रभाग", "fundamental": "मौलिक", "further": "आगे / अतिरिक्त", "galaxy": "आकाशगंगा", "gallery": "दीर्घा", "generation": "पीढ़ी / उत्पादन", "generator": "जनरेटर", "genuine": "वास्तविक", "glimpse": "झलक", "habitat": "आवास", "hemisphere": "गोलार्ध", "historian": "इतिहासकार", "historic": "ऐतिहासिक", "holistic": "समग्र", "honour": "सम्मान", "humanity": "मानवता", "hydrogen": "हाइड्रोजन", "identical": "समान", "identify": "पहचानना", "illegal": "अवैध", "immigrant": "आप्रवासी", "impression": "छाप / प्रभाव", "incredible": "अविश्वसनीय", "indicate": "संकेत देना", "individual": "व्यक्ति / व्यक्तिगत", "industrial": "औद्योगिक", "infect": "संक्रमित करना", "innovation": "नवाचार", "institution": "संस्था", "insurance": "बीमा", "integrate": "एकीकृत करना", "interact": "बातचीत करना", "interface": "इंटरफ़ेस", "interpret": "व्याख्या करना", "investment": "निवेश", "investor": "निवेशक", "irrelevant": "अप्रासंगिक", "justice": "न्याय", "judgement": "निर्णय", "journal": "पत्रिका / दैनिक लेखा", "landscape": "परिदृश्य", "lecture": "व्याख्यान", "legislation": "कानून / विधि", "legitimate": "वैध", "liquid": "तरल", "luxury": "विलासिता", "management": "प्रबंधन", "manufacture": "निर्माण करना", "manuscript": "पांडुलिपि", "massive": "विशाल", "measure": "मापना / माप", "mechanism": "तंत्र", "merge": "मिलाना", "migrant": "प्रवासी", "migrate": "प्रवास करना", "minimal": "न्यूनतम", "mistake": "गलती", "monetary": "मौद्रिक", "movement": "आंदोलन / गति", "mysterious": "रहस्यमय", "negative": "नकारात्मक", "neighbour": "पड़ोसी", "neuron": "न्यूरॉन", "notion": "धारणा", "objective": "उद्देश्य / निष्पक्ष", "observe": "निरीक्षण करना", "opportunity": "अवसर", "operation": "संचालन", "organisation": "संगठन", "origin": "उत्पत्ति", "original": "मूल", "overseas": "विदेश", "package": "पैकेज", "panel": "पैनल", "partial": "आंशिक", "particle": "कण", "particular": "विशेष", "permanent": "स्थायी", "phenomenon": "घटना / परिघटना", "physician": "चिकित्सक", "platform": "मंच", "politics": "राजनीति", "pollution": "प्रदूषण", "portrait": "चित्र", "potential": "संभावित / क्षमता", "poverty": "गरीबी", "powerful": "शक्तिशाली", "practise": "अभ्यास करना", "preparation": "तैयारी", "prescribe": "निर्धारित करना", "prestige": "प्रतिष्ठा", "production": "उत्पादन", "productive": "उत्पादक", "profession": "पेशा", "professor": "प्रोफेसर", "program": "कार्यक्रम", "promote": "बढ़ावा देना", "promotion": "प्रचार / पदोन्नति", "property": "संपत्ति", "proposal": "प्रस्ताव", "prove": "साबित करना", "publish": "प्रकाशित करना", "quality": "गुणवत्ता", "quantity": "मात्रा", "radiant": "चमकदार", "radiation": "विकिरण", "radical": "कट्टर / मौलिक", "rationality": "तर्कसंगतता", "realist": "यथार्थवादी", "realize": "समझना / महसूस करना", "rebuild": "फिर से बनाना", "recession": "मंदी", "recognise": "पहचानना", "recovery": "पुनर्प्राप्ति", "refine": "सुधारना", "regulation": "नियम", "release": "जारी करना", "relevant": "प्रासंगिक", "repetition": "दोहराव", "represent": "प्रतिनिधित्व करना", "representative": "प्रतिनिधि", "researcher": "शोधकर्ता", "resident": "निवासी", "resource": "संसाधन", "respond": "उत्तर देना", "restoration": "बहाली", "restrict": "सीमित करना", "robust": "मजबूत", "sacrifice": "बलिदान", "satellite": "उपग्रह", "scale": "माप / पैमाना", "scientist": "वैज्ञानिक", "section": "खंड / भाग", "sensitive": "संवेदनशील", "sequence": "क्रम", "settlement": "बस्ती / समझौता", "significant": "महत्वपूर्ण", "signal": "संकेत", "simulate": "अनुकरण करना", "skeleton": "कंकाल", "smartphone": "स्मार्टफोन", "socialise": "मेलजोल करना", "software": "सॉफ्टवेयर", "solution": "समाधान", "specific": "विशिष्ट", "species": "प्रजाति", "sponsor": "प्रायोजक", "stabilise": "स्थिर करना", "statistics": "सांख्यिकी", "strategy": "रणनीति", "structure": "संरचना", "submerge": "डुबाना", "subscribe": "सदस्यता लेना", "sunflower": "सूरजमुखी", "surround": "घेरना", "survival": "जीवित रहना", "sustainable": "टिकाऊ", "symptom": "लक्षण", "system": "प्रणाली", "tariff": "शुल्क", "technique": "तकनीक", "telescope": "दूरबीन", "temperature": "तापमान", "temporary": "अस्थायी", "toxic": "विषैला", "transform": "बदलना", "transition": "संक्रमण / परिवर्तन", "transmit": "प्रेषित करना", "tremendous": "बहुत बड़ा", "tropical": "उष्णकटिबंधीय", "ultimate": "अंतिम", "unemployment": "बेरोज़गारी", "universe": "ब्रह्मांड", "university": "विश्वविद्यालय", "unravel": "सुलझाना", "unusable": "अनुपयोगी", "urgency": "तत्कालता", "vacuum": "निर्वात / वैक्यूम", "variety": "विविधता", "various": "विभिन्न", "vehicle": "वाहन", "vernacular": "स्थानीय भाषा", "vessel": "पोत / बर्तन", "vibration": "कंपन", "violence": "हिंसा", "visible": "दिखाई देने वाला", "vision": "दृष्टि", "volume": "मात्रा / आयतन", "wilderness": "जंगल / निर्जन क्षेत्र", "worksheet": "वर्कशीट", "wrap": "लपेटना", "yawn": "जंभाई लेना"};
+let currentIndex = Number(localStorage.getItem('spell_currentIndex') || 0);
+let completedWords = JSON.parse(localStorage.getItem('spell_completedWords') || '[]');
+let correct = Number(localStorage.getItem('spell_correct') || 0);
+let wrong = Number(localStorage.getItem('spell_wrong') || 0);
+let retry = Number(localStorage.getItem('spell_retry') || 0);
+function save(){
+  localStorage.setItem('spell_currentIndex', currentIndex);
+  localStorage.setItem('spell_completedWords', JSON.stringify(completedWords));
+  localStorage.setItem('spell_correct', correct);
+  localStorage.setItem('spell_wrong', wrong);
+  localStorage.setItem('spell_retry', retry);
+}
+function updateStats(){
+  document.getElementById('total').textContent = words.length;
+  document.getElementById('completed').textContent = completedWords.length;
+  document.getElementById('pending').textContent = words.length - completedWords.length;
+  document.getElementById('correct').textContent = correct;
+  document.getElementById('wrong').textContent = wrong;
+  document.getElementById('retry').textContent = retry;
+  document.getElementById('progressBar').style.width = ((completedWords.length / words.length) * 100).toFixed(1) + '%';
+}
+async function getHindiMeaning(word){
+  const cacheKey = 'hi_mean_' + word.toLowerCase();
+  const cached = localStorage.getItem(cacheKey);
+  if (cached) return cached;
+  if (localMeanings[word]) return localMeanings[word];
+  try {
+    const res = await fetch('https://api.mymemory.translated.net/get?q=' + encodeURIComponent(word) + '&langpair=en|hi');
+    const data = await res.json();
+    const meaning = (data && data.responseData && data.responseData.translatedText) ? data.responseData.translatedText : 'Hindi meaning not found';
+    localStorage.setItem(cacheKey, meaning);
+    return meaning;
+  } catch(e) {
+    return 'Hindi meaning online load nahi hua';
+  }
+}
+async function showWord(){
+  if (completedWords.length === words.length) {
+    document.getElementById('word').textContent = 'All Completed ✅';
+    document.getElementById('meaning').textContent = 'सभी शब्द पूरे हो गए';
+    document.getElementById('answer').value = '';
+    updateStats(); return;
+  }
+  while (completedWords.includes(words[currentIndex])) currentIndex = (currentIndex + 1) % words.length;
+  const w = words[currentIndex];
+  document.getElementById('word').textContent = w;
+  document.getElementById('meaning').textContent = 'Hindi meaning loading...';
+  document.getElementById('answer').value = '';
+  document.getElementById('answer').classList.remove('error');
+  document.getElementById('message').textContent = '';
+  document.getElementById('meaning').textContent = await getHindiMeaning(w);
+  updateStats(); save();
+}
+function checkAnswer(){
+  const w = words[currentIndex];
+  const ans = document.getElementById('answer').value.trim();
+  const msg = document.getElementById('message');
+  if (!ans) { msg.textContent = 'Please type the spelling first.'; msg.className = 'bad'; return; }
+  if (ans.toLowerCase() === w.toLowerCase()) {
+    msg.textContent = 'Correct ✅'; msg.className = 'ok';
+    document.getElementById('answer').classList.remove('error');
+    if (!completedWords.includes(w)) { completedWords.push(w); correct++; }
+    save(); updateStats();
+    setTimeout(nextWord, 700);
+  } else {
+    wrong++; retry++;
+    msg.textContent = 'Wrong ❌ Correct spelling is: ' + w;
+    msg.className = 'bad';
+    document.getElementById('answer').classList.add('error');
+    save(); updateStats();
+  }
+}
+function nextWord(){ currentIndex = (currentIndex + 1) % words.length; showWord(); }
+function speakWord(){
+  const u = new SpeechSynthesisUtterance(words[currentIndex]);
+  u.lang = 'en-US'; speechSynthesis.speak(u);
+}
+function showPending(){
+  const pending = words.filter(w => !completedWords.includes(w));
+  document.getElementById('wordList').innerHTML = '<b>Pending Words (' + pending.length + '):</b><br>' + pending.join(', ');
+}
+function resetProgress(){
+  if(confirm('Reset all progress?')) {
+    localStorage.removeItem('spell_currentIndex'); localStorage.removeItem('spell_completedWords');
+    localStorage.removeItem('spell_correct'); localStorage.removeItem('spell_wrong'); localStorage.removeItem('spell_retry');
+    currentIndex=0; completedWords=[]; correct=0; wrong=0; retry=0; showWord(); document.getElementById('wordList').innerHTML='';
+  }
+}
+document.getElementById('answer').addEventListener('keydown', e => { if(e.key === 'Enter') checkAnswer(); });
+showWord();
+</script>
+</body>
+</html>
