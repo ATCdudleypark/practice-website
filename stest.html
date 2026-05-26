@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spelling Test Practice</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f7fb;
+      margin: 0;
+      padding: 20px;
+      color: #222;
+    }
+    .app {
+      max-width: 850px;
+      margin: auto;
+      background: white;
+      padding: 24px;
+      border-radius: 14px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    }
+    h1 { text-align: center; }
+    .word-box {
+      font-size: 38px;
+      font-weight: bold;
+      text-align: center;
+      padding: 25px;
+      background: #eef4ff;
+      border-radius: 12px;
+      margin: 20px 0;
+      letter-spacing: 1px;
+    }
+    input {
+      width: 100%;
+      padding: 15px;
+      font-size: 22px;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      box-sizing: border-box;
+      text-align: center;
+    }
+    input.error {
+      border-color: red;
+      background: #ffecec;
+    }
+    button {
+      padding: 12px 18px;
+      margin: 8px 5px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      background: #0b66c3;
+      color: white;
+    }
+    button.secondary { background: #555; }
+    button.danger { background: #d93025; }
+    .buttons { text-align: center; margin-top: 16px; }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin: 20px 0;
+    }
+    .card {
+      background: #f1f1f1;
+      padding: 12px;
+      border-radius: 10px;
+      text-align: center;
+      font-weight: bold;
+    }
+    .message {
+      text-align: center;
+      font-size: 20px;
+      min-height: 30px;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    .correct { color: green; }
+    .wrong { color: red; }
+    .history {
+      margin-top: 20px;
+      max-height: 220px;
+      overflow-y: auto;
+      border-top: 1px solid #ddd;
+      padding-top: 10px;
+    }
+    .history div {
+      padding: 7px;
+      border-bottom: 1px solid #eee;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <h1>Spelling Test Practice</h1>
+
+    <div class="stats">
+      <div class="card">Total<br><span id="total">0</span></div>
+      <div class="card">Correct<br><span id="correct">0</span></div>
+      <div class="card">Wrong<br><span id="wrong">0</span></div>
+      <div class="card">Retries<br><span id="retries">0</span></div>
+    </div>
+
+    <div class="word-box" id="wordDisplay"></div>
+
+    <input id="answer" type="text" placeholder="Type spelling here..." autocomplete="off" />
+
+    <div class="message" id="message"></div>
+
+    <div class="buttons">
+      <button onclick="checkAnswer()">Check</button>
+      <button class="secondary" onclick="retryWord()">Retry</button>
+      <button class="secondary" onclick="nextWord()">Next Word</button>
+      <button class="danger" onclick="resetTest()">Reset</button>
+    </div>
+
+    <div class="history">
+      <h3>Tracking / History</h3>
+      <div id="historyList"></div>
+    </div>
+  </div>
+
+<script>
+const words = ["abrupt", "absolute", "academic", "academy", "accessible", "accommodate", "account", "accurate", "acoustics", "addition", "advance", "adverse", "advertise", "advocate", "aesthetic", "aggressive", "agricultural", "agriculture", "aircraft", "airplane", "algorithm", "almond", "alternative", "amend", "amongst", "analyse", "analyst", "anniversary", "antiquarian", "apparent", "appendix", "appetite", "application", "appoint", "approve", "archaeologist", "archaeology", "architecture", "artefact", "artificial", "assessment", "assignment", "assistance", "associate", "association", "astronomer", "astronomical", "atmosphere", "atomic", "attendant", "audience", "auditory", "aurora", "auroral", "automaker", "automobile", "awesome", "backward", "bargain", "barrier", "basically", "battery", "beleaguer", "benefit", "bias", "binary", "biofuel", "biological", "biologist", "bounty", "bracket", "brainwave", "brood", "bulb", "bulk", "canyon", "capture", "carbon", "celebrate", "celebration", "census", "characterisation", "chemical", "circulation", "clump", "cluster", "coalition", "colleague", "collection", "collector", "colony", "combination", "combo", "compatible", "compensate", "complain", "concentrate", "concept", "conclude", "confess", "confidence", "confidential", "consider", "consideration", "consonant", "consume", "consumer", "contain", "boom", "boredom", "boundary", "breadth", "breed", "broadcast", "bureau", "cardiologist", "carmaker", "categorise", "centrifuge", "champagne", "channel", "claim", "clamour", "classical", "cocoon", "collaboration", "collaborative", "collide", "collision", "colloquial", "commercial", "common", "company", "complexity", "compliance", "compute", "conduct", "confection", "conference", "Congress", "consensus", "conservation", "constant", "construction", "consultant", "contract", "contribute", "convene", "biology", "bloom", "blunt", "cosmic", "counterintuitive", "coverage", "croft", "cruise", "crustacean", "current", "dater", "database", "dam", "defensible", "deficiency", "definition", "department", "depict", "depiction", "desirable", "detect", "detector", "disappear", "discern", "discipline", "distance", "distinctive", "distinguish", "dolphin", "dominate", "downside", "economics", "eclipse", "echo", "electrical", "electromagnetic", "electron", "elimination", "emission", "employment", "coral", "cord", "core", "criminology", "critical", "criticism", "cultural", "curator", "curious", "deafen", "debris", "declare", "deform", "delight", "deliver", "depth", "derivative", "desirability", "digital", "dimension", "dioxide", "disorder", "disrupt", "dissatisfaction", "district", "disturb", "document", "drainage", "dramatic", "drought", "economist", "economy", "electric", "electronic", "element", "eliminate", "conventional", "conversational", "coordinate", "entrepreneur", "environment", "epidemic", "essential", "establish", "estimate", "evident", "exceptional", "excess", "expectation", "experiment", "explanation", "external", "extreme", "engineer", "engineering", "enlarge", "equation", "equity", "eradicate", "European", "eventual", "evidence", "executive", "exert", "expansion", "exploration", "explore", "extensive", "fastener", "feather", "feature", "feedback", "financial", "firm", "flake", "flexible", "flick", "float", "flush", "folk", "foreshadow", "forge", "forgive", "formalistic", "fort", "Forth", "fossilise", "foyer", "fracture", "fragile", "frequency", "frontier", "frustrate", "fund", "fundamental", "further", "galaxy", "gallery", "gasoline", "generation", "generator", "genome", "genuine", "glean", "glimpse", "grain", "grin", "encompass", "energetic", "engagement", "justice", "judgement", "journal", "habitat", "hemisphere", "herd", "hind", "historian", "historic", "hive", "holistic", "honour", "hub", "humanity", "hydrogen", "iceberg", "identical", "identify", "illegal", "immigrant", "impression", "incredible", "indicate", "indirect", "individual", "industrial", "infect", "inflection", "inject", "innovation", "innovator", "institution", "instruct", "insurance", "integrate", "intend", "interact", "interface", "interpersonal", "interpret", "interpretation", "interpreter", "interstellar", "inundate", "investigation", "investment", "investor", "involve", "irrelevant", "irrigate", "landowner", "landscape", "Latino", "lecture", "leftover", "legislation", "legitimate", "liquid", "lizard", "loose", "luxury", "manipulation", "manufacture", "manuscript", "matchstick", "maternal", "measure", "microphone", "migrant", "migrate", "mite", "mode", "molecular", "movement", "multifaceted", "mutate", "negative", "narrowness", "nanometre", "northwest", "notion", "observer", "observe", "objective", "offset", "operation", "operational", "ore", "organisation", "origin", "outward", "overseas", "overturn", "management", "mandate", "manifesto", "margin", "marine", "massive", "mechanism", "merge", "merger", "mimic", "minimal", "mistake", "monetary", "moonshot", "motivational", "mysterious", "neighbour", "neuron", "nonpartisan", "obstruct", "oceanographer", "odd", "opportunity", "optimise", "optimistic", "original", "originate", "outgo", "package", "panel", "Parliament", "partial", "particle", "particular", "macromolecular", "majority", "mammal", "pertain", "pesticide", "phenomenon", "pilgrim", "platform", "plunge", "politics", "pollinator", "pollution", "poverty", "powerful", "practise", "preparation", "prescribe", "prestige", "production", "productive", "profession", "promote", "promotion", "property", "pseudo", "publish", "pulse", "quantity", "quality", "pend", "perch", "permanent", "photograph", "phrenetic", "physician", "polar", "political", "politician", "portrait", "pose", "potential", "predicament", "predict", "preliminary", "prestigious", "previous", "problematic", "professor", "professorship", "program", "proposal", "propose", "prove", "pun", "pursuit", "puzzle", "radiant", "radiation", "radical", "rationality", "realist", "realize", "rear", "reassess", "rebound", "rebuild", "recession", "recognise", "reconstruct", "recorder", "recovery", "refine", "regulation", "reimagine", "release", "relevant", "repetition", "patch", "patriotism", "pedal", "resident", "resource", "respond", "rhythmical", "rivet", "robust", "sacrifice", "satellite", "scale", "scotch", "script", "section", "sequence", "sequester", "settlement", "significant", "signifier", "simulate", "slam", "sleek", "slump", "software", "solution", "sparkiness", "specific", "spew", "spike", "staircase", "stale", "starvation", "stream", "stressful", "structure", "sunflower", "surround", "survival", "symptom", "system", "representative", "reproduce", "researcher", "responsive", "restoration", "restrict", "rough", "scarlet", "scatter", "scientist", "sediment", "sensitive", "sensitivity", "sexton", "shock", "wave", "signal", "situate", "skeleton", "sketch", "smartphone", "sober", "socialise", "spate", "spatial", "species", "spinal", "sponsor", "stabilise", "statistics", "stimulate", "strategy", "struggle", "submerge", "subscribe", "survive", "sustainable", "switch", "replace", "reposition", "represent", "thoughtful", "throughout", "tint", "trade-off", "trait", "transcend", "treatable", "tremendous", "tropical", "unattractive", "unashamed", "ultimate", "unimaginative", "universe", "university", "unravel", "unusable", "unweldable", "utter", "temperature", "temporary", "tend", "toolkit", "totality", "toxic", "transform", "transition", "transmit", "tune", "uncover", "undefined", "unemployment", "unmix", "unpopulated", "unpublished", "uptick", "upwards", "urgency", "vacuum", "vampire", "variety", "various", "vehicle", "vernacular", "vessel", "vibration", "violence", "visible", "vision", "visualisation", "visualize", "volume", "weld", "wilderness", "wingless", "worksheet", "wrap", "tariff", "technique", "telescope", "yawn"];
+
+let currentWord = "";
+let total = 0;
+let correct = 0;
+let wrong = 0;
+let retries = 0;
+let checkedThisWord = false;
+
+function randomWord() {
+  currentWord = words[Math.floor(Math.random() * words.length)];
+  document.getElementById("wordDisplay").textContent = currentWord;
+  document.getElementById("answer").value = "";
+  document.getElementById("answer").classList.remove("error");
+  document.getElementById("message").textContent = "";
+  document.getElementById("message").className = "message";
+  checkedThisWord = false;
+  document.getElementById("answer").focus();
+}
+
+function checkAnswer() {
+  const input = document.getElementById("answer");
+  const typed = input.value.trim();
+
+  if (typed === "") {
+    document.getElementById("message").textContent = "Please type the spelling first.";
+    document.getElementById("message").className = "message wrong";
+    input.classList.add("error");
+    return;
+  }
+
+  if (checkedThisWord) {
+    document.getElementById("message").textContent = "Already checked. Click Next Word.";
+    return;
+  }
+
+  total++;
+  checkedThisWord = true;
+
+  if (typed.toLowerCase() === currentWord.toLowerCase()) {
+    correct++;
+    input.classList.remove("error");
+    document.getElementById("message").textContent = "Correct ✅";
+    document.getElementById("message").className = "message correct";
+    addHistory(currentWord, typed, true);
+  } else {
+    wrong++;
+    input.classList.add("error");
+    document.getElementById("message").textContent = "Wrong ❌ Correct spelling: " + currentWord;
+    document.getElementById("message").className = "message wrong";
+    addHistory(currentWord, typed, false);
+  }
+
+  updateStats();
+}
+
+function retryWord() {
+  retries++;
+  checkedThisWord = false;
+  document.getElementById("answer").value = "";
+  document.getElementById("answer").classList.remove("error");
+  document.getElementById("message").textContent = "Retry the same word.";
+  document.getElementById("message").className = "message";
+  updateStats();
+  document.getElementById("answer").focus();
+}
+
+function nextWord() {
+  randomWord();
+}
+
+function resetTest() {
+  total = 0;
+  correct = 0;
+  wrong = 0;
+  retries = 0;
+  document.getElementById("historyList").innerHTML = "";
+  updateStats();
+  randomWord();
+}
+
+function updateStats() {
+  document.getElementById("total").textContent = total;
+  document.getElementById("correct").textContent = correct;
+  document.getElementById("wrong").textContent = wrong;
+  document.getElementById("retries").textContent = retries;
+}
+
+function addHistory(word, typed, isCorrect) {
+  const div = document.createElement("div");
+  div.innerHTML = isCorrect
+    ? "✅ <b>" + word + "</b> — typed: " + typed
+    : "❌ <b>" + word + "</b> — you typed: <span style='color:red'>" + typed + "</span>";
+  document.getElementById("historyList").prepend(div);
+}
+
+document.getElementById("answer").addEventListener("keydown", function(e) {
+  if (e.key === "Enter") checkAnswer();
+});
+
+randomWord();
+</script>
+</body>
+</html>
