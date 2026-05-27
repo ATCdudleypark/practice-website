@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PTE Dictation Practice with Hindi + Listen + Tracker</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial, sans-serif;background:#eef2f7;color:#1f2937;padding:18px}
+.container{max-width:1050px;margin:auto;background:#fff;padding:22px;border-radius:16px;box-shadow:0 8px 25px rgba(0,0,0,.08)}
+h1{text-align:center;color:#0f3b66;margin:0 0 16px}
+.topbar,.tracker{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:15px;background:#f8fafc;padding:12px;border-radius:12px;border:1px solid #e5e7eb}
+.card{background:#f1f7ff;border-left:6px solid #2563eb;padding:16px;border-radius:12px;margin:14px 0;font-size:22px;line-height:1.55;font-weight:bold}
+.hindi{background:#fff7ed;border-left-color:#f97316;font-size:20px;font-weight:600}
+textarea{width:100%;height:125px;padding:14px;font-size:19px;border:1px solid #cbd5e1;border-radius:10px;resize:vertical;outline:none}
+textarea:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.15)}
+button,select,input{padding:10px 13px;border-radius:9px;border:1px solid #cbd5e1;font-size:15px}
+button{border:none;color:#fff;cursor:pointer}
+.blue{background:#2563eb}.green{background:#16a34a}.gray{background:#64748b}.red{background:#dc2626}.purple{background:#7c3aed}.orange{background:#f97316}
+.buttons{display:flex;gap:10px;flex-wrap:wrap;margin-top:13px}
+.result{margin-top:16px;padding:15px;border-radius:12px;background:#f8fafc;border:1px solid #e5e7eb;font-size:17px;line-height:1.7}
+.right{color:#15803d;font-weight:bold}.wrong{color:#dc2626;font-weight:bold;text-decoration:underline}.missing{color:#b45309;font-weight:bold}.extra{color:#9333ea;font-weight:bold}
+.stat{background:#fff;padding:9px 12px;border-radius:10px;border:1px solid #e5e7eb;font-weight:bold}
+.progress{width:100%;height:14px;background:#e5e7eb;border-radius:999px;overflow:hidden}
+.bar{height:100%;width:0%;background:#16a34a}
+.small{font-size:14px;color:#64748b;margin-top:8px}
+@media(max-width:600px){.card{font-size:19px}.hindi{font-size:18px}}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>PTE Write From Dictation Practice</h1>
+
+<div class="tracker">
+  <div class="stat">Sentence <span id="currentNo">1</span> / <span id="totalNo"></span></div>
+  <div class="stat">Completed: <span id="completed">0</span></div>
+  <div class="stat">Pending: <span id="pending">0</span></div>
+  <div class="stat">Average Score: <span id="avgScore">0%</span></div>
+  <div class="progress"><div id="progressBar" class="bar"></div></div>
+</div>
+
+<div class="topbar">
+  <div>
+    <label><b>Go to:</b></label>
+    <input type="number" id="jumpNo" min="1" value="1" style="width:90px" />
+    <button class="blue" onclick="jumpSentence()">Open</button>
+  </div>
+  <div>
+    <label><b>Mode:</b></label>
+    <select id="mode" onchange="displaySentence(false)">
+      <option value="show">Show English</option>
+      <option value="hide">Hide English</option>
+    </select>
+  </div>
+  <div>
+    <label><b>Speed:</b></label>
+    <select id="rate">
+      <option value="0.75">Slow</option>
+      <option value="0.9" selected>Normal</option>
+      <option value="1.05">Fast</option>
+    </select>
+  </div>
+</div>
+
+<div id="sentence" class="card"></div>
+<div id="hindi" class="card hindi"></div>
+
+<div class="buttons">
+  <button class="orange" onclick="speakSentence()">▶ Listen</button>
+  <button class="gray" onclick="stopSpeak()">■ Stop</button>
+  <button class="purple" onclick="toggleHindi()">Hindi Show / Hide</button>
+</div>
+
+<textarea id="userInput" placeholder="Listen and type the full English sentence here..."></textarea>
+
+<div class="buttons">
+  <button class="blue" onclick="checkAnswer()">Check Answer</button>
+  <button class="gray" onclick="prevSentence()">Previous</button>
+  <button class="green" onclick="nextSentence()">Next</button>
+  <button class="purple" onclick="toggleSentence()">English Show / Hide</button>
+  <button class="red" onclick="clearText()">Clear</button>
+  <button class="red" onclick="resetTracker()">Reset Tracker</button>
+</div>
+
+<div id="result" class="result">Result will show here.</div>
+<div class="small">Tip: punctuation and capital letters are ignored. Your progress is saved automatically in this browser.</div>
+</div>
+
+<script>
+const sentences = [
+  {
+    "no": 1,
+    "text": "Building trust is not something that can be achieved overnight.",
+    "hi": "भरोसा बनाना ऐसी चीज़ नहीं है जो रातों-रात हासिल की जा सके।"
+  },
+  {
+    "no": 2,
+    "text": "Certain scientific principles must be learned verbally or by a logical deduction.",
+    "hi": "कुछ वैज्ञानिक सिद्धांतों को मौखिक रूप से या तार्किक निष्कर्ष से सीखना चाहिए।"
+  },
+  {
+    "no": 3,
+    "text": "The economic strength of early Roman Republic will be examined.",
+    "hi": "प्रारंभिक रोमन गणराज्य की आर्थिक शक्ति की जांच की जाएगी।"
+  },
+  {
+    "no": 4,
+    "text": "It may not be possible to solve the problem easily.",
+    "hi": "समस्या को आसानी से हल करना संभव नहीं हो सकता।"
+  },
+  {
+    "no": 5,
+    "text": "One of the election promises is to decrease the income tax.",
+    "hi": "चुनावी वादों में से एक आयकर कम करना है।"
+  },
+  {
+    "no": 6,
+    "text": "Our professor is hosting the business development conference.",
+    "hi": "हमारे प्रोफेसर व्यवसाय विकास सम्मेलन की मेजबानी कर रहे हैं।"
+  },
+  {
+    "no": 7,
+    "text": "Preparation is important to avoid mishaps in the lab.",
+    "hi": "प्रयोगशाला में दुर्घटनाओं से बचने के लिए तैयारी महत्वपूर्ण है।"
+  },
+  {
+    "no": 8,
+    "text": "Students will focus on reporting news on the changing media world.",
+    "hi": "विद्यार्थी बदलती मीडिया दुनिया पर समाचार रिपोर्टिंग पर ध्यान देंगे।"
+  },
+  {
+    "no": 9,
+    "text": "Studies show there is a positive correlation between the two variables.",
+    "hi": "अध्ययन बताते हैं कि दोनों चरों के बीच सकारात्मक संबंध है।"
+  },
+  {
+    "no": 10,
+    "text": "The dance department stages elaborated performances each semester.",
+    "hi": "नृत्य विभाग हर सेमेस्टर विस्तृत प्रदर्शन आयोजित करता है।"
+  },
+  {
+    "no": 11,
+    "text": "The lecture tomorrow will discuss the educational policy of the United States.",
+    "hi": "कल का व्याख्यान संयुक्त राज्य की शैक्षिक नीति पर चर्चा करेगा।"
+  },
+  {
+    "no": 12,
+    "text": "The other book isn't thorough but it's more insightful.",
+    "hi": "दूसरी किताब पूरी तरह विस्तृत नहीं है, लेकिन वह अधिक समझदार है।"
+  },
+  {
+    "no": 13,
+    "text": "The railway makes long-distance travel possible for everyone.",
+    "hi": "रेलवे लंबी दूरी की यात्रा को सभी के लिए संभव बनाता है।"
+  },
+  {
+    "no": 14,
+    "text": "There is a pharmacy on campus near the bookstore.",
+    "hi": "कैंपस में किताबों की दुकान के पास एक फार्मेसी है।"
+  },
+  {
+    "no": 15,
+    "text": "There was a prize for the best student of the presentation.",
+    "hi": "प्रस्तुति के सर्वश्रेष्ठ विद्यार्थी के लिए एक पुरस्कार था।"
+  },
+  {
+    "no": 16,
+    "text": "Traffic is the main cause of air pollution in many cities.",
+    "hi": "कई शहरों में यातायात वायु प्रदूषण का मुख्य कारण है।"
+  },
+  {
+    "no": 17,
+    "text": "You can use your laptops in the lecture.",
+    "hi": "आप व्याख्यान में अपने लैपटॉप का उपयोग कर सकते हैं।"
+  },
+  {
+    "no": 18,
+    "text": "Check the website if you are looking for discounted textbooks.",
+    "hi": "यदि आप रियायती पाठ्यपुस्तकें ढूंढ रहे हैं तो वेबसाइट देखें।"
+  },
+  {
+    "no": 19,
+    "text": "Our courses help to improve critical thinking and independent learning skills.",
+    "hi": "हमारे पाठ्यक्रम आलोचनात्मक सोच और स्वतंत्र सीखने के कौशल को सुधारने में मदद करते हैं।"
+  },
+  {
+    "no": 20,
+    "text": "Protective clothing must always be worn in the laboratory.",
+    "hi": "प्रयोगशाला में सुरक्षात्मक कपड़े हमेशा पहनने चाहिए।"
+  },
+  {
+    "no": 21,
+    "text": "Strangely, people are simultaneously impressed by and skeptical of statistics.",
+    "hi": "अजीब बात है कि लोग आंकड़ों से एक साथ प्रभावित और संदेहपूर्ण होते हैं।"
+  },
+  {
+    "no": 22,
+    "text": "The student advisor was aware that the lecture today has been canceled.",
+    "hi": "छात्र सलाहकार को पता था कि आज का व्याख्यान रद्द कर दिया गया है।"
+  },
+  {
+    "no": 23,
+    "text": "The office hours will be changed from next term.",
+    "hi": "कार्यालय समय अगले टर्म से बदल दिया जाएगा।"
+  },
+  {
+    "no": 24,
+    "text": "Despite their differences, all forms of life share certain characteristics.",
+    "hi": "अपने अंतर के बावजूद, जीवन के सभी रूप कुछ विशेषताएँ साझा करते हैं।"
+  },
+  {
+    "no": 25,
+    "text": "The new media have transcended traditional national boundaries.",
+    "hi": "नए मीडिया ने पारंपरिक राष्ट्रीय सीमाओं को पार कर लिया है।"
+  },
+  {
+    "no": 26,
+    "text": "They developed a unique approach to training their employees.",
+    "hi": "उन्होंने अपने कर्मचारियों को प्रशिक्षित करने का एक अनोखा तरीका विकसित किया।"
+  },
+  {
+    "no": 27,
+    "text": "The library will be closed for staff training tomorrow morning.",
+    "hi": "पुस्तकालय कल सुबह स्टाफ प्रशिक्षण के लिए बंद रहेगा।"
+  },
+  {
+    "no": 28,
+    "text": "Social media is criticized for causing internet addiction.",
+    "hi": "सोशल मीडिया की इंटरनेट लत पैदा करने के लिए आलोचना की जाती है।"
+  },
+  {
+    "no": 29,
+    "text": "Please make sure you choose a course that provides good career opportunities.",
+    "hi": "कृपया सुनिश्चित करें कि आप ऐसा कोर्स चुनें जो अच्छे करियर अवसर प्रदान करे।"
+  },
+  {
+    "no": 30,
+    "text": "The student shop sells a range of stationery.",
+    "hi": "छात्र दुकान स्टेशनरी की एक श्रृंखला बेचती है।"
+  },
+  {
+    "no": 31,
+    "text": "Sugar is a compound including carbon, hydrogen and oxygen atoms.",
+    "hi": "चीनी एक यौगिक है जिसमें कार्बन, हाइड्रोजन और ऑक्सीजन परमाणु शामिल हैं।"
+  },
+  {
+    "no": 32,
+    "text": "Air pollution is a serious problem all over the world.",
+    "hi": "वायु प्रदूषण पूरी दुनिया में एक गंभीर समस्या है।"
+  },
+  {
+    "no": 33,
+    "text": "Designers need to keep up with social trends.",
+    "hi": "डिजाइनरों को सामाजिक रुझानों के साथ अपडेट रहना चाहिए।"
+  },
+  {
+    "no": 34,
+    "text": "The course involves a combination of pure and applied mathematics.",
+    "hi": "पाठ्यक्रम में शुद्ध और अनुप्रयुक्त गणित का संयोजन शामिल है।"
+  },
+  {
+    "no": 35,
+    "text": "the digital camera has some advantages over traditional film.",
+    "hi": "डिजिटल कैमरे के पारंपरिक फिल्म की तुलना में कुछ लाभ हैं।"
+  },
+  {
+    "no": 36,
+    "text": "Philosophy uses logic and reason to analyze human experience.",
+    "hi": "दर्शन मानव अनुभव का विश्लेषण करने के लिए तर्क और कारण का उपयोग करता है।"
+  },
+  {
+    "no": 37,
+    "text": "An effective business manager is always open to new ideas.",
+    "hi": "एक प्रभावी व्यवसाय प्रबंधक हमेशा नए विचारों के लिए खुला होता है।"
+  },
+  {
+    "no": 38,
+    "text": "When the root system of a plant fails, foliage suffers.",
+    "hi": "जब किसी पौधे की जड़ प्रणाली विफल होती है, तो पत्तियां प्रभावित होती हैं।"
+  },
+  {
+    "no": 39,
+    "text": "The falling birth rate means the number of students drops.",
+    "hi": "घटती जन्म दर का मतलब है कि विद्यार्थियों की संख्या कम होती है।"
+  },
+  {
+    "no": 40,
+    "text": "All industries consist of systems of inputs, processes, outputs and feedback..",
+    "hi": "सभी उद्योग इनपुट, प्रक्रियाओं, आउटपुट और फीडबैक की प्रणालियों से बने होते हैं।"
+  },
+  {
+    "no": 41,
+    "text": "Food containing ample calories provides little or no nutritional value.",
+    "hi": "अधिक कैलोरी वाला भोजन बहुत कम या कोई पोषण मूल्य नहीं देता।"
+  },
+  {
+    "no": 42,
+    "text": "One student representative will be selected from each class.",
+    "hi": "प्रत्येक कक्षा से एक छात्र प्रतिनिधि चुना जाएगा।"
+  },
+  {
+    "no": 43,
+    "text": "Optional tutorials are offered in the final week of a term.",
+    "hi": "टर्म के अंतिम सप्ताह में वैकल्पिक ट्यूटोरियल दिए जाते हैं।"
+  },
+  {
+    "no": 44,
+    "text": "Mathematics provides a foundation for understanding and analyzing data.",
+    "hi": "गणित डेटा को समझने और विश्लेषण करने की नींव प्रदान करता है।"
+  },
+  {
+    "no": 45,
+    "text": "There was a lot of traffic this morning.",
+    "hi": "आज सुबह बहुत ट्रैफिक था।"
+  },
+  {
+    "no": 46,
+    "text": "Coursework gives students the chances to thoroughly explore the subject.",
+    "hi": "कोर्सवर्क विद्यार्थियों को विषय को गहराई से समझने का अवसर देता है।"
+  },
+  {
+    "no": 47,
+    "text": "The professor discussed the article yesterday in this class.",
+    "hi": "प्रोफेसर ने कल इस कक्षा में लेख पर चर्चा की।"
+  },
+  {
+    "no": 48,
+    "text": "The professor said biology is not the only one on the exam.",
+    "hi": "प्रोफेसर ने कहा कि परीक्षा में केवल जीवविज्ञान ही नहीं है।"
+  },
+  {
+    "no": 49,
+    "text": "A good research assistant is not afraid to ask questions.",
+    "hi": "एक अच्छा शोध सहायक प्रश्न पूछने से नहीं डरता।"
+  },
+  {
+    "no": 50,
+    "text": "Maths uses numbers and shapes to solve problems.",
+    "hi": "गणित समस्याओं को हल करने के लिए संख्याओं और आकारों का उपयोग करता है।"
+  },
+  {
+    "no": 51,
+    "text": "Much of the research is carried out in the laboratory.",
+    "hi": "अधिकांश शोध प्रयोगशाला में किया जाता है।"
+  },
+  {
+    "no": 52,
+    "text": "The content is to define the combination of math and philosophy.",
+    "hi": "विषयवस्तु गणित और दर्शन के संयोजन को परिभाषित करती है।"
+  },
+  {
+    "no": 53,
+    "text": "Please move us to the meeting room for the next hour.",
+    "hi": "कृपया हमें अगले घंटे के लिए मीटिंग रूम में ले जाएँ।"
+  },
+  {
+    "no": 54,
+    "text": "Participating in the class is the center of the course.",
+    "hi": "कक्षा में भाग लेना इस कोर्स का केंद्र है।"
+  },
+  {
+    "no": 55,
+    "text": "In my opinion, this car should be repaired soon.",
+    "hi": "मेरी राय में, इस कार की जल्द मरम्मत होनी चाहिए।"
+  },
+  {
+    "no": 56,
+    "text": "A good architectural structure should be useful, durable, and beautiful.",
+    "hi": "एक अच्छी वास्तु संरचना उपयोगी, टिकाऊ और सुंदर होनी चाहिए।"
+  },
+  {
+    "no": 57,
+    "text": "Education and training provide important skills for the labor force.",
+    "hi": "शिक्षा और प्रशिक्षण श्रम शक्ति के लिए महत्वपूर्ण कौशल प्रदान करते हैं।"
+  },
+  {
+    "no": 58,
+    "text": "Having enough sleep has many positive benefits.",
+    "hi": "पर्याप्त नींद लेने के कई सकारात्मक लाभ हैं।"
+  },
+  {
+    "no": 59,
+    "text": "The professor will have a ... in the class.",
+    "hi": "प्रोफेसर की कक्षा में एक ... होगा।"
+  },
+  {
+    "no": 60,
+    "text": "Graduates from this course typically pursue careers in the financial sector.",
+    "hi": "इस कोर्स के स्नातक आमतौर पर वित्तीय क्षेत्र में करियर बनाते हैं।"
+  },
+  {
+    "no": 61,
+    "text": "The elective course introduces engineering students to construction practices and concepts.",
+    "hi": "वैकल्पिक कोर्स इंजीनियरिंग विद्यार्थियों को निर्माण अभ्यासों और अवधारणाओं से परिचित कराता है।"
+  },
+  {
+    "no": 62,
+    "text": "A visit to the designed museum is of great value.",
+    "hi": "डिज़ाइन किए गए संग्रहालय की यात्रा बहुत मूल्यवान है।"
+  },
+  {
+    "no": 63,
+    "text": "We encourage students to complete their applications before the deadline.",
+    "hi": "हम विद्यार्थियों को अंतिम तारीख से पहले अपने आवेदन पूरे करने के लिए प्रोत्साहित करते हैं।"
+  },
+  {
+    "no": 64,
+    "text": "He has landed a job in a very prestigious law firm.",
+    "hi": "उसे एक बहुत प्रतिष्ठित कानूनी फर्म में नौकरी मिली है।"
+  },
+  {
+    "no": 65,
+    "text": "Your ideas have been discussed and debated in seminars and tutorials.",
+    "hi": "आपके विचारों पर सेमिनारों और ट्यूटोरियल में चर्चा और बहस की गई है।"
+  },
+  {
+    "no": 66,
+    "text": "Marine environments have been destroyed through pollution and unsustainable development.",
+    "hi": "समुद्री पर्यावरण प्रदूषण और अस्थिर विकास से नष्ट हो गए हैं।"
+  },
+  {
+    "no": 67,
+    "text": "We study science to understand and appreciate the world around us.",
+    "hi": "हम अपने आसपास की दुनिया को समझने और सराहने के लिए विज्ञान पढ़ते हैं।"
+  },
+  {
+    "no": 68,
+    "text": "Please close the door behind you when you leave the room.",
+    "hi": "कृपया कमरे से बाहर निकलते समय अपने पीछे दरवाज़ा बंद कर दें।"
+  },
+  {
+    "no": 69,
+    "text": "It is a debate about the knowledge of values.",
+    "hi": "यह मूल्यों के ज्ञान के बारे में एक बहस है।"
+  },
+  {
+    "no": 70,
+    "text": "Plants are the living things that can grow on land or in water.",
+    "hi": "पौधे जीवित चीज़ें हैं जो भूमि या पानी में बढ़ सकती हैं।"
+  },
+  {
+    "no": 71,
+    "text": "All of the assigments must be submitted in person to the faculty office",
+    "hi": "सभी असाइनमेंट व्यक्तिगत रूप से फैकल्टी कार्यालय में जमा करने होंगे।"
+  },
+  {
+    "no": 72,
+    "text": "The opening hours of the library are reduced during summer.",
+    "hi": "गर्मियों के दौरान पुस्तकालय के खुलने के घंटे कम हो जाते हैं।"
+  },
+  {
+    "no": 73,
+    "text": "The application process may take longer than expected.",
+    "hi": "आवेदन प्रक्रिया अपेक्षा से अधिक समय ले सकती है।"
+  },
+  {
+    "no": 74,
+    "text": "You will acquire many skills during your academic studies.",
+    "hi": "आप अपनी अकादमिक पढ़ाई के दौरान कई कौशल प्राप्त करेंगे।"
+  },
+  {
+    "no": 75,
+    "text": "Geography is generally divided into two main branches: human and physical.",
+    "hi": "भूगोल को सामान्यतः दो मुख्य शाखाओं में बांटा जाता है: मानव और भौतिक।"
+  },
+  {
+    "no": 76,
+    "text": "Organizational failure is considered from various perspectives in academic literature.",
+    "hi": "संगठनात्मक विफलता को अकादमिक साहित्य में विभिन्न दृष्टिकोणों से देखा जाता है।"
+  },
+  {
+    "no": 77,
+    "text": "Parents' talk to children tends to be simplified.",
+    "hi": "माता-पिता की बच्चों से बातचीत अक्सर सरल होती है।"
+  },
+  {
+    "no": 78,
+    "text": "Sea levels are expected to rise during the next century.",
+    "hi": "अगले शताब्दी के दौरान समुद्र स्तर बढ़ने की उम्मीद है।"
+  },
+  {
+    "no": 79,
+    "text": "Students have the options to live in college residencess or apartments.",
+    "hi": "विद्यार्थियों के पास कॉलेज आवास या अपार्टमेंट में रहने के विकल्प हैं।"
+  },
+  {
+    "no": 80,
+    "text": "The cafeteria features sandwiches, salads, soup, fish and chicken.",
+    "hi": "कैफेटेरिया में सैंडविच, सलाद, सूप, मछली और चिकन उपलब्ध हैं।"
+  },
+  {
+    "no": 81,
+    "text": "The director of the gallery was grateful for anonymous donation.",
+    "hi": "गैलरी के निदेशक गुमनाम दान के लिए आभारी थे।"
+  },
+  {
+    "no": 82,
+    "text": "Those who are considering a career in marketing should attend the talk.",
+    "hi": "जो लोग मार्केटिंग में करियर पर विचार कर रहे हैं, उन्हें वार्ता में भाग लेना चाहिए।"
+  },
+  {
+    "no": 83,
+    "text": "I thought it was through the small meeting room.",
+    "hi": "मुझे लगा कि यह छोटे मीटिंग रूम के रास्ते था।"
+  },
+  {
+    "no": 84,
+    "text": "Students should leaves their bags on the tables by the door.",
+    "hi": "विद्यार्थियों को अपने बैग दरवाज़े के पास मेज़ों पर छोड़ने चाहिए।"
+  },
+  {
+    "no": 85,
+    "text": "The rising of the sea level indicates climate change.",
+    "hi": "समुद्र स्तर का बढ़ना जलवायु परिवर्तन को दर्शाता है।"
+  },
+  {
+    "no": 86,
+    "text": "All new medical school students must attend the talk about optional courses.",
+    "hi": "सभी नए मेडिकल स्कूल विद्यार्थियों को वैकल्पिक कोर्सों के बारे में वार्ता में भाग लेना चाहिए।"
+  },
+  {
+    "no": 87,
+    "text": "There is an accounting assignment for finance students.",
+    "hi": "वित्त विद्यार्थियों के लिए एक लेखा असाइनमेंट है।"
+  },
+  {
+    "no": 88,
+    "text": "Visual aids can be really helpful when you are revising.",
+    "hi": "जब आप दोहरा रहे हों तो दृश्य सामग्री बहुत सहायक हो सकती है।"
+  },
+  {
+    "no": 89,
+    "text": "The glittering of the lake surface camouflages the fish.",
+    "hi": "झील की सतह की चमक मछली को छिपा देती है।"
+  },
+  {
+    "no": 90,
+    "text": "The assessment procedure has been altered slightly since last year.",
+    "hi": "मूल्यांकन प्रक्रिया पिछले वर्ष से थोड़ी बदल दी गई है।"
+  },
+  {
+    "no": 91,
+    "text": "The contract will be signed by the owner of the company.",
+    "hi": "अनुबंध कंपनी के मालिक द्वारा हस्ताक्षरित किया जाएगा।"
+  },
+  {
+    "no": 92,
+    "text": "Scientists were unsure when the early man first left Africa.",
+    "hi": "वैज्ञानिक अनिश्चित थे कि प्रारंभिक मनुष्य पहली बार अफ्रीका से कब निकला।"
+  },
+  {
+    "no": 93,
+    "text": "You do not need to have specialist knowledge to enjoy this book.",
+    "hi": "इस पुस्तक का आनंद लेने के लिए आपको विशेषज्ञ ज्ञान की आवश्यकता नहीं है।"
+  },
+  {
+    "no": 94,
+    "text": "Many food crops require a large amount of water and fertilizer.",
+    "hi": "कई खाद्य फसलों को बहुत अधिक पानी और उर्वरक की आवश्यकता होती है।"
+  },
+  {
+    "no": 95,
+    "text": "Medical researchers have focused on the causes of diseases and treatments.",
+    "hi": "चिकित्सा शोधकर्ताओं ने बीमारियों के कारणों और उपचारों पर ध्यान केंद्रित किया है।"
+  },
+  {
+    "no": 96,
+    "text": "Please confirm that you have received the textbook",
+    "hi": "कृपया पुष्टि करें कि आपको पाठ्यपुस्तक मिल गई है।"
+  },
+  {
+    "no": 97,
+    "text": "The news will not be received until the following week.",
+    "hi": "समाचार अगले सप्ताह तक प्राप्त नहीं होगा।"
+  },
+  {
+    "no": 98,
+    "text": "linguistics is the scientific study and analysis of language.",
+    "hi": "भाषाविज्ञान भाषा का वैज्ञानिक अध्ययन और विश्लेषण है।"
+  },
+  {
+    "no": 99,
+    "text": "This class will look at the structure of the essay.",
+    "hi": "यह कक्षा निबंध की संरचना को देखेगी।"
+  },
+  {
+    "no": 100,
+    "text": "Auditions for the university choir will be held next week.",
+    "hi": "विश्वविद्यालय गायक मंडली के लिए ऑडिशन अगले सप्ताह होंगे।"
+  },
+  {
+    "no": 101,
+    "text": "Calculators may not be used in the exam.",
+    "hi": "परीक्षा में कैलकुलेटर का उपयोग नहीं किया जा सकता।"
+  },
+  {
+    "no": 102,
+    "text": "Calculators allow us to add numbers without making mistakes.",
+    "hi": "कैलकुलेटर हमें गलती किए बिना संख्याएँ जोड़ने की अनुमति देते हैं।"
+  },
+  {
+    "no": 103,
+    "text": "Speak to your tutor if you need further assistance.",
+    "hi": "यदि आपको और सहायता चाहिए तो अपने ट्यूटर से बात करें।"
+  },
+  {
+    "no": 104,
+    "text": "His appointment as Minister of culture was seen as a demotion.",
+    "hi": "संस्कृति मंत्री के रूप में उनकी नियुक्ति को पदावनति के रूप में देखा गया।"
+  },
+  {
+    "no": 105,
+    "text": "The area has a wide variety of underwater habitats and species.",
+    "hi": "इस क्षेत्र में पानी के नीचे के आवासों और प्रजातियों की विस्तृत विविधता है।"
+  },
+  {
+    "no": 106,
+    "text": "Salt is produced from the seawater or extracted from the ground.",
+    "hi": "नमक समुद्री पानी से बनाया जाता है या जमीन से निकाला जाता है।"
+  },
+  {
+    "no": 107,
+    "text": "The printers automatically print two sides of each page.",
+    "hi": "प्रिंटर प्रत्येक पृष्ठ के दोनों तरफ अपने आप प्रिंट करते हैं।"
+  },
+  {
+    "no": 108,
+    "text": "The reception staff can give advice on renting private accommodation.",
+    "hi": "रिसेप्शन स्टाफ निजी आवास किराए पर लेने के बारे में सलाह दे सकता है।"
+  },
+  {
+    "no": 109,
+    "text": "Human beings compete with other living things for resources and space.",
+    "hi": "मनुष्य संसाधनों और स्थान के लिए अन्य जीवित चीज़ों से प्रतिस्पर्धा करते हैं।"
+  },
+  {
+    "no": 110,
+    "text": "The north campus car park could be closed on Sunday.",
+    "hi": "उत्तर कैंपस कार पार्क रविवार को बंद हो सकता है।"
+  },
+  {
+    "no": 111,
+    "text": "Please note that the seminar has now been canceled.",
+    "hi": "कृपया ध्यान दें कि सेमिनार अब रद्द कर दिया गया है।"
+  },
+  {
+    "no": 112,
+    "text": "His analysis study appears to be based on the false permise.",
+    "hi": "उनका विश्लेषण अध्ययन गलत आधार पर आधारित प्रतीत होता है।"
+  },
+  {
+    "no": 113,
+    "text": "New media journalism is an exciting area of study.",
+    "hi": "न्यू मीडिया पत्रकारिता अध्ययन का एक रोमांचक क्षेत्र है।"
+  },
+  {
+    "no": 114,
+    "text": "The archeologist's new discoveries stand out in previously overlooked foundations.",
+    "hi": "पुरातत्वविद् की नई खोजें पहले अनदेखी की गई नींवों में अलग दिखाई देती हैं।"
+  },
+  {
+    "no": 115,
+    "text": "In this language course , we focus on fluency and accuracy.",
+    "hi": "इस भाषा कोर्स में, हम प्रवाह और शुद्धता पर ध्यान देते हैं।"
+  },
+  {
+    "no": 116,
+    "text": "The faculty staff are very approachable, helpful and extremely friendly.",
+    "hi": "फैकल्टी स्टाफ बहुत मिलनसार, सहायक और अत्यंत मित्रवत हैं।"
+  },
+  {
+    "no": 117,
+    "text": "The professor took year off to work on her book,",
+    "hi": "प्रोफेसर ने अपनी किताब पर काम करने के लिए एक साल की छुट्टी ली।"
+  },
+  {
+    "no": 118,
+    "text": "Collaboration between department is feature of successful companies.",
+    "hi": "विभागों के बीच सहयोग सफल कंपनियों की विशेषता है।"
+  },
+  {
+    "no": 119,
+    "text": "Some departments have their own specialist book collections.",
+    "hi": "कुछ विभागों के अपने विशेष पुस्तक संग्रह होते हैं।"
+  },
+  {
+    "no": 120,
+    "text": "The chemistry building is located near the entrance of the campus.",
+    "hi": "रसायन विज्ञान भवन कैंपस के प्रवेश द्वार के पास स्थित है।"
+  },
+  {
+    "no": 121,
+    "text": "The island is located at the south end of the bay.",
+    "hi": "द्वीप खाड़ी के दक्षिणी छोर पर स्थित है।"
+  },
+  {
+    "no": 122,
+    "text": "There are some doubts about whether these events actually occurred.",
+    "hi": "इन घटनाओं के वास्तव में घटित होने को लेकर कुछ संदेह हैं।"
+  },
+  {
+    "no": 123,
+    "text": "The economic predictions turned out to be incorrect.",
+    "hi": "आर्थिक भविष्यवाणियाँ गलत साबित हुईं।"
+  },
+  {
+    "no": 124,
+    "text": "The college operates a system of continuous assessment.",
+    "hi": "कॉलेज निरंतर मूल्यांकन की प्रणाली संचालित करता है।"
+  },
+  {
+    "no": 125,
+    "text": "Technology has changed the media we both used and studied.",
+    "hi": "तकनीक ने उन मीडिया को बदल दिया है जिन्हें हम उपयोग और अध्ययन करते हैं।"
+  },
+  {
+    "no": 126,
+    "text": "There have been many changes recently in the mathematics department.",
+    "hi": "गणित विभाग में हाल ही में कई बदलाव हुए हैं।"
+  },
+  {
+    "no": 127,
+    "text": "Gravity is the force that attracts two bodies toward one another.",
+    "hi": "गुरुत्वाकर्षण वह बल है जो दो पिंडों को एक-दूसरे की ओर आकर्षित करता है।"
+  },
+  {
+    "no": 128,
+    "text": "Rising sea temperature is a sign of climate change.",
+    "hi": "समुद्र के तापमान का बढ़ना जलवायु परिवर्तन का संकेत है।"
+  },
+  {
+    "no": 129,
+    "text": "Enrolling in a second major will increase your career options.",
+    "hi": "दूसरे प्रमुख विषय में नामांकन आपके करियर विकल्पों को बढ़ाएगा।"
+  },
+  {
+    "no": 130,
+    "text": "Every students has a regular meeting with his or her personal tutor.",
+    "hi": "प्रत्येक विद्यार्थी की अपने निजी ट्यूटर के साथ नियमित बैठक होती है।"
+  },
+  {
+    "no": 131,
+    "text": "More research is needed before any definitive conclusion is drawn.",
+    "hi": "किसी अंतिम निष्कर्ष से पहले और शोध की आवश्यकता है।"
+  },
+  {
+    "no": 132,
+    "text": "A laptop computer has been found in the biology lab.",
+    "hi": "जीवविज्ञान प्रयोगशाला में एक लैपटॉप कंप्यूटर मिला है।"
+  },
+  {
+    "no": 133,
+    "text": "Most of the lectures begin promptly, so do not be late.",
+    "hi": "अधिकांश व्याख्यान समय पर शुरू होते हैं, इसलिए देर न करें।"
+  },
+  {
+    "no": 134,
+    "text": "Art is an expression of creative skills and imagination.",
+    "hi": "कला रचनात्मक कौशल और कल्पना की अभिव्यक्ति है।"
+  },
+  {
+    "no": 135,
+    "text": "Remember, the prestigious student stewardship has strict eligibility criteria.",
+    "hi": "याद रखें, प्रतिष्ठित छात्र छात्रवृत्ति के लिए सख्त पात्रता मानदंड हैं।"
+  },
+  {
+    "no": 136,
+    "text": "Some economists argue that the entire financial system is fatally flawed.",
+    "hi": "कुछ अर्थशास्त्रियों का तर्क है कि पूरा वित्तीय तंत्र घातक रूप से त्रुटिपूर्ण है।"
+  },
+  {
+    "no": 137,
+    "text": "Novelists write about the best things that they know.",
+    "hi": "उपन्यासकार उन सर्वोत्तम चीज़ों के बारे में लिखते हैं जिन्हें वे जानते हैं।"
+  },
+  {
+    "no": 138,
+    "text": "The article considers the leisure habits of teenagers in rural areas.",
+    "hi": "लेख ग्रामीण क्षेत्रों में किशोरों की अवकाश आदतों पर विचार करता है।"
+  },
+  {
+    "no": 139,
+    "text": "Daily practice can build confidences and improve skills.",
+    "hi": "दैनिक अभ्यास आत्मविश्वास बना सकता है और कौशल सुधार सकता है।"
+  },
+  {
+    "no": 140,
+    "text": "All dissertations must be accompanied by a submission form.",
+    "hi": "सभी शोधप्रबंधों के साथ जमा करने का फॉर्म होना चाहिए।"
+  },
+  {
+    "no": 141,
+    "text": "A massive accumulation of data was converted into a communicable argument.",
+    "hi": "डेटा के विशाल संचय को संप्रेषणीय तर्क में बदला गया।"
+  },
+  {
+    "no": 142,
+    "text": "If finance is a cause of concern, scholarships may be available.",
+    "hi": "यदि वित्त चिंता का कारण है, तो छात्रवृत्तियाँ उपलब्ध हो सकती हैं।"
+  },
+  {
+    "no": 143,
+    "text": "We have not yet achieved equality in our society.",
+    "hi": "हमने अभी तक अपने समाज में समानता हासिल नहीं की है।"
+  },
+  {
+    "no": 144,
+    "text": "A good abstract hightlights the key points of your paper.",
+    "hi": "एक अच्छा सार आपके पेपर के मुख्य बिंदुओं को उजागर करता है।"
+  },
+  {
+    "no": 145,
+    "text": "If you need additional help, please visit the university resources center.",
+    "hi": "यदि आपको अतिरिक्त सहायता चाहिए, तो कृपया विश्वविद्यालय संसाधन केंद्र जाएँ।"
+  },
+  {
+    "no": 146,
+    "text": "Classical mechanics is sometimes considered as a branch of applied mathematics.",
+    "hi": "शास्त्रीय यांत्रिकी को कभी-कभी अनुप्रयुक्त गणित की शाखा माना जाता है।"
+  },
+  {
+    "no": 147,
+    "text": "The rising inflation rate indicates a decrease in demand for consumer products.",
+    "hi": "बढ़ती मुद्रास्फीति दर उपभोक्ता उत्पादों की मांग में कमी दिखाती है।"
+  },
+  {
+    "no": 148,
+    "text": "Listening is the key skill needed to succeed in this course.",
+    "hi": "सुनना इस कोर्स में सफल होने के लिए आवश्यक मुख्य कौशल है।"
+  },
+  {
+    "no": 149,
+    "text": "Distance learning allows you to develop a career around your commitments.",
+    "hi": "दूरस्थ शिक्षा आपको अपनी जिम्मेदारियों के अनुसार करियर विकसित करने देती है।"
+  },
+  {
+    "no": 150,
+    "text": "Castles were designed to intimidate both local people and the enemies.",
+    "hi": "किलों को स्थानीय लोगों और दुश्मनों दोनों को डराने के लिए बनाया गया था।"
+  },
+  {
+    "no": 151,
+    "text": "The library cafe is on the third floor.",
+    "hi": "पुस्तकालय कैफे तीसरी मंज़िल पर है।"
+  },
+  {
+    "no": 152,
+    "text": "Safety glasses should be worn while doing experiments in the lab.",
+    "hi": "प्रयोगशाला में प्रयोग करते समय सुरक्षा चश्मा पहनना चाहिए।"
+  },
+  {
+    "no": 153,
+    "text": "The lecture will cover the reason of climate change.",
+    "hi": "व्याख्यान जलवायु परिवर्तन के कारण को कवर करेगा।"
+  },
+  {
+    "no": 154,
+    "text": "Our aim is to reduce the risks that people take.",
+    "hi": "हमारा लक्ष्य लोगों द्वारा उठाए जाने वाले जोखिमों को कम करना है।"
+  },
+  {
+    "no": 155,
+    "text": "Our view is that all the educational reforms have been inadequately implemented.",
+    "hi": "हमारा विचार है कि सभी शैक्षिक सुधार अपर्याप्त रूप से लागू किए गए हैं।"
+  },
+  {
+    "no": 156,
+    "text": "Relying on natural ability will not get you far in science.",
+    "hi": "केवल प्राकृतिक क्षमता पर निर्भर रहना आपको विज्ञान में बहुत आगे नहीं ले जाएगा।"
+  },
+  {
+    "no": 157,
+    "text": "An introduction is an essential element of presentation.",
+    "hi": "परिचय प्रस्तुति का एक आवश्यक तत्व है।"
+  },
+  {
+    "no": 158,
+    "text": "The archeologists were astonished by the unexpected previously overlooked foundations.",
+    "hi": "पुरातत्वविद् अप्रत्याशित, पहले अनदेखी की गई नींवों से चकित थे।"
+  },
+  {
+    "no": 159,
+    "text": "The study center in the library has all the latest technologies.",
+    "hi": "पुस्तकालय का अध्ययन केंद्र नवीनतम तकनीकों से सुसज्जित है।"
+  },
+  {
+    "no": 160,
+    "text": "We should never underestimate the power of creative design.",
+    "hi": "हमें रचनात्मक डिजाइन की शक्ति को कभी कम नहीं आंकना चाहिए।"
+  },
+  {
+    "no": 161,
+    "text": "A new collection of articles has just been pulished.",
+    "hi": "लेखों का एक नया संग्रह अभी प्रकाशित हुआ है।"
+  },
+  {
+    "no": 162,
+    "text": "At university students can make friends for life.",
+    "hi": "विश्वविद्यालय में विद्यार्थी जीवनभर के दोस्त बना सकते हैं।"
+  },
+  {
+    "no": 163,
+    "text": "Farming is affected by changes in seasonal patterns.",
+    "hi": "खेती मौसमी पैटर्न में बदलाव से प्रभावित होती है।"
+  },
+  {
+    "no": 164,
+    "text": "We were discussing the methods used by criminals to commit crimes.",
+    "hi": "हम अपराधियों द्वारा अपराध करने के तरीकों पर चर्चा कर रहे थे।"
+  },
+  {
+    "no": 165,
+    "text": "Some students were absent due to the train delay.",
+    "hi": "कुछ विद्यार्थी ट्रेन की देरी के कारण अनुपस्थित थे।"
+  },
+  {
+    "no": 166,
+    "text": "The tutor has canceled the lecture for geography students.",
+    "hi": "ट्यूटर ने भूगोल विद्यार्थियों के लिए व्याख्यान रद्द कर दिया है।"
+  },
+  {
+    "no": 167,
+    "text": "All accounting students must submit their dissertations before the end of the week.",
+    "hi": "सभी लेखा विद्यार्थियों को सप्ताह के अंत से पहले अपने शोधप्रबंध जमा करने होंगे।"
+  },
+  {
+    "no": 168,
+    "text": "Students should register to gain access to the library printers.",
+    "hi": "विद्यार्थियों को पुस्तकालय प्रिंटर का उपयोग करने के लिए पंजीकरण करना चाहिए।"
+  },
+  {
+    "no": 169,
+    "text": "Plastic pollution is very dangerous to ocean lives.",
+    "hi": "प्लास्टिक प्रदूषण समुद्री जीवन के लिए बहुत खतरनाक है।"
+  },
+  {
+    "no": 170,
+    "text": "We should always use recyclable plastic and glass bottles.",
+    "hi": "हमें हमेशा पुनर्चक्रण योग्य प्लास्टिक और कांच की बोतलों का उपयोग करना चाहिए।"
+  },
+  {
+    "no": 171,
+    "text": "There is a widely believed perception that engineering is for boys.",
+    "hi": "यह व्यापक धारणा है कि इंजीनियरिंग लड़कों के लिए है।"
+  },
+  {
+    "no": 172,
+    "text": "There is a clear need for further research in this field.",
+    "hi": "इस क्षेत्र में और शोध की स्पष्ट आवश्यकता है।"
+  },
+  {
+    "no": 173,
+    "text": "Resources and materials are on hold at the library reference desk.",
+    "hi": "संसाधन और सामग्री पुस्तकालय संदर्भ डेस्क पर रोक कर रखी गई हैं।"
+  },
+  {
+    "no": 174,
+    "text": "The universities provide excellent leisure facilities for students and staff.",
+    "hi": "विश्वविद्यालय विद्यार्थियों और स्टाफ के लिए उत्कृष्ट मनोरंजन सुविधाएँ प्रदान करते हैं।"
+  },
+  {
+    "no": 175,
+    "text": "A good academic paper should present a clear argument.",
+    "hi": "एक अच्छा अकादमिक पेपर स्पष्ट तर्क प्रस्तुत करना चाहिए।"
+  },
+  {
+    "no": 176,
+    "text": "The student union hosts a variety of social events.",
+    "hi": "छात्र संघ विभिन्न सामाजिक कार्यक्रम आयोजित करता है।"
+  },
+  {
+    "no": 177,
+    "text": "You should have awareness of how the business operates globally.",
+    "hi": "आपको यह समझ होनी चाहिए कि व्यवसाय वैश्विक स्तर पर कैसे संचालित होता है।"
+  },
+  {
+    "no": 178,
+    "text": "The results of the study underscore the importance of the discoveries from early detection.",
+    "hi": "अध्ययन के परिणाम प्रारंभिक पहचान से हुई खोजों के महत्व को रेखांकित करते हैं।"
+  },
+  {
+    "no": 179,
+    "text": "Momentum is defined as the combination of mass and velocity.",
+    "hi": "संवेग को द्रव्यमान और वेग के संयोजन के रूप में परिभाषित किया जाता है।"
+  },
+  {
+    "no": 180,
+    "text": "The educational level is found to be related to social and economic background.",
+    "hi": "शैक्षिक स्तर सामाजिक और आर्थिक पृष्ठभूमि से संबंधित पाया गया है।"
+  },
+  {
+    "no": 181,
+    "text": "You need to make sure that all your essays are handed in on time.",
+    "hi": "आपको सुनिश्चित करना चाहिए कि आपके सभी निबंध समय पर जमा हों।"
+  },
+  {
+    "no": 182,
+    "text": "Essays and assignments spread out across the academic year.",
+    "hi": "निबंध और असाइनमेंट पूरे अकादमिक वर्ष में फैले होते हैं।"
+  },
+  {
+    "no": 183,
+    "text": "We have sufficient methods to study brain activity.",
+    "hi": "हमारे पास मस्तिष्क गतिविधि का अध्ययन करने के पर्याप्त तरीके हैं।"
+  },
+  {
+    "no": 184,
+    "text": "Social psychology is concerned with the understanding of human behavior.",
+    "hi": "सामाजिक मनोविज्ञान मानव व्यवहार की समझ से संबंधित है।"
+  },
+  {
+    "no": 185,
+    "text": "Important details from the argument are missing in the summary.",
+    "hi": "तर्क के महत्वपूर्ण विवरण सारांश में गायब हैं।"
+  },
+  {
+    "no": 186,
+    "text": "The history of the university is a long and interesting one.",
+    "hi": "विश्वविद्यालय का इतिहास लंबा और रोचक है।"
+  },
+  {
+    "no": 187,
+    "text": "The commissioner will apportion the funds among all the sovereignties.",
+    "hi": "आयुक्त सभी संप्रभु क्षेत्रों के बीच धन का बंटवारा करेगा।"
+  },
+  {
+    "no": 188,
+    "text": "You will be tested via continuous assessment and examinations.",
+    "hi": "आपको निरंतर मूल्यांकन और परीक्षाओं के माध्यम से परखा जाएगा।"
+  },
+  {
+    "no": 189,
+    "text": "Water filters on campus will discourage the unnecessary use of plastic bottles.",
+    "hi": "कैंपस में पानी के फिल्टर प्लास्टिक बोतलों के अनावश्यक उपयोग को रोकेंगे।"
+  },
+  {
+    "no": 190,
+    "text": "The subject is complex and difficult to explain.",
+    "hi": "विषय जटिल और समझाने में कठिन है।"
+  },
+  {
+    "no": 191,
+    "text": "The most popular courses still have a few places left.",
+    "hi": "सबसे लोकप्रिय कोर्सों में अभी भी कुछ स्थान बचे हैं।"
+  },
+  {
+    "no": 192,
+    "text": "The rising temperature is changing the wildlife population.",
+    "hi": "बढ़ता तापमान वन्यजीव आबादी को बदल रहा है।"
+  },
+  {
+    "no": 193,
+    "text": "Continuing students will be sent necessary application forms.",
+    "hi": "जारी विद्यार्थी आवश्यक आवेदन फॉर्म भेजे जाएंगे।"
+  },
+  {
+    "no": 194,
+    "text": "Requests for late applications will not be accepted under any circumstances.",
+    "hi": "देर से आवेदन के अनुरोध किसी भी परिस्थिति में स्वीकार नहीं किए जाएंगे।"
+  },
+  {
+    "no": 195,
+    "text": "People have been dependent on using phones in their everyday life.",
+    "hi": "लोग अपने दैनिक जीवन में फोन के उपयोग पर निर्भर हो गए हैं।"
+  },
+  {
+    "no": 196,
+    "text": "The collapse of the housing market has caused recessions throughout the world.",
+    "hi": "आवास बाजार के पतन ने दुनिया भर में मंदी पैदा की है।"
+  },
+  {
+    "no": 197,
+    "text": "Accountancy students need to submit their dissertations this week.",
+    "hi": "अकाउंटेंसी विद्यार्थियों को इस सप्ताह अपने शोधप्रबंध जमा करने होंगे।"
+  },
+  {
+    "no": 198,
+    "text": "Time and distance are used to calculate speed.",
+    "hi": "गति की गणना करने के लिए समय और दूरी का उपयोग किया जाता है।"
+  },
+  {
+    "no": 199,
+    "text": "Scientists have found all parts of science today.",
+    "hi": "वैज्ञानिकों ने आज विज्ञान के सभी हिस्से खोज लिए हैं।"
+  },
+  {
+    "no": 200,
+    "text": "Public perception about biotechnology is crucial for developing scientific consensus.",
+    "hi": "जैव प्रौद्योगिकी के बारे में सार्वजनिक धारणा वैज्ञानिक सहमति विकसित करने के लिए महत्वपूर्ण है।"
+  },
+  {
+    "no": 201,
+    "text": "Students who are successful have a good strategy for learning.",
+    "hi": "सफल विद्यार्थियों के पास सीखने की अच्छी रणनीति होती है।"
+  },
+  {
+    "no": 202,
+    "text": "Today's lecture is canceled because the lecturer is ill.",
+    "hi": "आज का व्याख्यान रद्द है क्योंकि व्याख्याता बीमार है।"
+  },
+  {
+    "no": 203,
+    "text": "Good research delivers practical benefit to real people.",
+    "hi": "अच्छा शोध वास्तविक लोगों को व्यावहारिक लाभ देता है।"
+  },
+  {
+    "no": 204,
+    "text": "Before attending the lecture, you must register online or by post.",
+    "hi": "व्याख्यान में शामिल होने से पहले आपको ऑनलाइन या डाक से पंजीकरण करना होगा।"
+  },
+  {
+    "no": 205,
+    "text": "This course provides the opportunity to get valuable industry experience.",
+    "hi": "यह कोर्स मूल्यवान उद्योग अनुभव प्राप्त करने का अवसर प्रदान करता है।"
+  },
+  {
+    "no": 206,
+    "text": "Artists need to make their works both original and accessible.",
+    "hi": "कलाकारों को अपने कार्यों को मौलिक और सुलभ दोनों बनाना चाहिए।"
+  },
+  {
+    "no": 207,
+    "text": "All answers must be thoroughly researched and supported by relevant theories.",
+    "hi": "सभी उत्तरों पर पूरी तरह शोध होना चाहिए और संबंधित सिद्धांतों से समर्थित होना चाहिए।"
+  },
+  {
+    "no": 208,
+    "text": "Read the student safety instructions before using any equipment in the workshops.",
+    "hi": "कार्यशालाओं में किसी भी उपकरण का उपयोग करने से पहले छात्र सुरक्षा निर्देश पढ़ें।"
+  },
+  {
+    "no": 209,
+    "text": "Scientists were unsure when the early man left Africa.",
+    "hi": "वैज्ञानिक अनिश्चित थे कि प्रारंभिक मनुष्य अफ्रीका से कब निकला।"
+  },
+  {
+    "no": 210,
+    "text": "These three separate resources are not enough for this assessment.",
+    "hi": "ये तीन अलग-अलग संसाधन इस मूल्यांकन के लिए पर्याप्त नहीं हैं।"
+  },
+  {
+    "no": 211,
+    "text": "Students should take the training course to use the gym.",
+    "hi": "विद्यार्थियों को जिम का उपयोग करने के लिए प्रशिक्षण कोर्स करना चाहिए।"
+  },
+  {
+    "no": 212,
+    "text": "The article illuminates the intricate relationship between culture and language.",
+    "hi": "लेख संस्कृति और भाषा के जटिल संबंध को स्पष्ट करता है।"
+  },
+  {
+    "no": 213,
+    "text": "The department works closely with its partners in the business community.",
+    "hi": "विभाग व्यवसाय समुदाय में अपने साझेदारों के साथ मिलकर काम करता है।"
+  },
+  {
+    "no": 214,
+    "text": "The employment rate steadily increased over the last year.",
+    "hi": "पिछले वर्ष रोजगार दर लगातार बढ़ी।"
+  },
+  {
+    "no": 215,
+    "text": "Our study program equips students with essential skills for university.",
+    "hi": "हमारा अध्ययन कार्यक्रम विद्यार्थियों को विश्वविद्यालय के लिए आवश्यक कौशलों से सुसज्जित करता है।"
+  },
+  {
+    "no": 216,
+    "text": "Participants recorded their sleep hours in the journals.",
+    "hi": "प्रतिभागियों ने अपनी नींद के घंटे पत्रिकाओं में दर्ज किए।"
+  },
+  {
+    "no": 217,
+    "text": "Please confirm your essay topic before the deadline.",
+    "hi": "कृपया अंतिम तारीख से पहले अपने निबंध विषय की पुष्टि करें।"
+  },
+  {
+    "no": 218,
+    "text": "Effective communication is the key to becoming a successful manager.",
+    "hi": "प्रभावी संचार सफल प्रबंधक बनने की कुंजी है।"
+  },
+  {
+    "no": 219,
+    "text": "There will be a quiz next week.",
+    "hi": "अगले सप्ताह एक क्विज़ होगा।"
+  },
+  {
+    "no": 220,
+    "text": "Measures must be taken to prevent unemployment rate from increasing.",
+    "hi": "बेरोजगारी दर को बढ़ने से रोकने के लिए उपाय किए जाने चाहिए।"
+  },
+  {
+    "no": 221,
+    "text": "The reception staff can give information of lending and printing.",
+    "hi": "रिसेप्शन स्टाफ उधार लेने और प्रिंटिंग की जानकारी दे सकता है।"
+  },
+  {
+    "no": 222,
+    "text": "The university auditorium is around the corner.",
+    "hi": "विश्वविद्यालय सभागार कोने के पास है।"
+  },
+  {
+    "no": 223,
+    "text": "You do not need to have specialist knowledge to be able to read the book.",
+    "hi": "पुस्तक पढ़ने में सक्षम होने के लिए आपको विशेषज्ञ ज्ञान की आवश्यकता नहीं है।"
+  },
+  {
+    "no": 224,
+    "text": "The exam will not be posted until further notice.",
+    "hi": "परीक्षा आगे सूचना तक पोस्ट नहीं की जाएगी।"
+  },
+  {
+    "no": 225,
+    "text": "The next lecture will take place at a different location.",
+    "hi": "अगला व्याख्यान अलग स्थान पर होगा।"
+  }
+];
+
+let currentIndex = Number(localStorage.getItem("pte_current_index") || 0);
+let showHindi = true;
+let tracker = JSON.parse(localStorage.getItem("pte_tracker_hindi_listen") || "{}");
+
+function saveTracker() {
+  localStorage.setItem("pte_tracker_hindi_listen", JSON.stringify(tracker));
+  localStorage.setItem("pte_current_index", currentIndex);
+}
+
+function cleanText(text) {
+  return text.toLowerCase()
+    .replace(/[.,!?;:"'()\[\]…]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function displaySentence(clearInput=true) {
+  const item = sentences[currentIndex];
+  document.getElementById("currentNo").innerText = item.no;
+  document.getElementById("totalNo").innerText = sentences.length;
+  document.getElementById("jumpNo").max = sentences.length;
+  document.getElementById("jumpNo").value = item.no;
+
+  const mode = document.getElementById("mode").value;
+  document.getElementById("sentence").innerText = mode === "hide"
+    ? "English sentence hidden. Click Listen and type your answer."
+    : item.text;
+
+  document.getElementById("hindi").style.display = showHindi ? "block" : "none";
+  document.getElementById("hindi").innerText = "Hindi meaning: " + item.hi;
+
+  if (clearInput) {
+    document.getElementById("userInput").value = "";
+    document.getElementById("result").innerHTML = "Result will show here.";
+  }
+  updateTrackerUI();
+  saveTracker();
+}
+
+function speakSentence() {
+  stopSpeak();
+  const item = sentences[currentIndex];
+  const utter = new SpeechSynthesisUtterance(item.text);
+  utter.lang = "en-US";
+  utter.rate = Number(document.getElementById("rate").value);
+  utter.pitch = 1;
+  speechSynthesis.speak(utter);
+}
+
+function stopSpeak() {
+  if ("speechSynthesis" in window) speechSynthesis.cancel();
+}
+
+function checkAnswer() {
+  const item = sentences[currentIndex];
+  const correctText = item.text;
+  const typedText = document.getElementById("userInput").value;
+
+  const correctWords = cleanText(correctText).split(" ").filter(Boolean);
+  const typedWords = cleanText(typedText).split(" ").filter(Boolean);
+
+  let right = 0, wrong = 0, missing = 0, review = "", typedReview = "";
+  for (let i = 0; i < correctWords.length; i++) {
+    if (typedWords[i] === correctWords[i]) {
+      right++;
+      review += `<span class="right">${correctWords[i]}</span> `;
+    } else if (typedWords[i] === undefined) {
+      missing++;
+      review += `<span class="missing">${correctWords[i]}</span> `;
+    } else {
+      wrong++;
+      review += `<span class="wrong">${correctWords[i]}</span> `;
+    }
+  }
+
+  typedWords.forEach((w, i) => {
+    if (correctWords[i] === w) typedReview += `<span class="right">${w}</span> `;
+    else typedReview += `<span class="wrong">${w}</span> `;
+  });
+
+  const extra = Math.max(0, typedWords.length - correctWords.length);
+  const totalMistakes = wrong + missing + extra;
+  const percentage = correctWords.length ? Math.round((right / correctWords.length) * 100) : 0;
+
+  tracker[item.no] = {
+    score: percentage,
+    right,
+    wrong,
+    missing,
+    extra,
+    mistakes: totalMistakes,
+    lastAnswer: typedText,
+    checkedAt: new Date().toLocaleString()
+  };
+  saveTracker();
+  updateTrackerUI();
+
+  document.getElementById("result").innerHTML = `
+    <p class="right">Right words: ${right}</p>
+    <p class="wrong">Wrong words: ${wrong}</p>
+    <p class="missing">Missing words: ${missing}</p>
+    <p class="extra">Extra words: ${extra}</p>
+    <p><b>Total mistakes:</b> ${totalMistakes}</p>
+    <p><b>Score:</b> ${percentage}%</p>
+    <hr>
+    <p><b>Correct sentence review:</b></p>
+    <p>${review}</p>
+    <p><b>Your typed answer review:</b></p>
+    <p>${typedReview || "No answer typed"}</p>
+    <p><b>Hindi meaning:</b> ${item.hi}</p>
+  `;
+}
+
+function updateTrackerUI() {
+  const done = Object.keys(tracker).length;
+  const pending = sentences.length - done;
+  let avg = 0;
+  if (done > 0) {
+    avg = Math.round(Object.values(tracker).reduce((sum, x) => sum + (x.score || 0), 0) / done);
+  }
+  document.getElementById("completed").innerText = done;
+  document.getElementById("pending").innerText = pending;
+  document.getElementById("avgScore").innerText = avg + "%";
+  document.getElementById("progressBar").style.width = Math.round((done / sentences.length) * 100) + "%";
+}
+
+function nextSentence() {
+  currentIndex = (currentIndex + 1) % sentences.length;
+  displaySentence();
+}
+
+function prevSentence() {
+  currentIndex = (currentIndex - 1 + sentences.length) % sentences.length;
+  displaySentence();
+}
+
+function jumpSentence() {
+  const no = parseInt(document.getElementById("jumpNo").value, 10);
+  if (no >= 1 && no <= sentences.length) {
+    currentIndex = no - 1;
+    displaySentence();
+  } else {
+    alert("Please enter a number from 1 to " + sentences.length);
+  }
+}
+
+function toggleSentence() {
+  const mode = document.getElementById("mode");
+  const typed = document.getElementById("userInput").value;
+  mode.value = mode.value === "show" ? "hide" : "show";
+  displaySentence(false);
+  document.getElementById("userInput").value = typed;
+}
+
+function toggleHindi() {
+  showHindi = !showHindi;
+  displaySentence(false);
+}
+
+function clearText() {
+  document.getElementById("userInput").value = "";
+  document.getElementById("result").innerHTML = "Result will show here.";
+}
+
+function resetTracker() {
+  if (confirm("Reset all completed/pending/score tracker data?")) {
+    tracker = {};
+    saveTracker();
+    updateTrackerUI();
+    document.getElementById("result").innerHTML = "Tracker reset completed.";
+  }
+}
+
+displaySentence();
+</script>
+</body>
+</html>
