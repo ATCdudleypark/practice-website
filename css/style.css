@@ -117,5 +117,36 @@ marquee h2 {
 main{
     padding:40px;
     text-align:center;
-    min-height:3000px;
+    min-height:calc(100vh - 180px);
+}
+/* Mobile */
+@media (max-width: 768px) {
+  main {
+    padding: 15px;
+    min-height: calc(100vh - 160px);
+  }
+
+  .mothersday img {
+    width: 100%;
+  }
+
+  marquee h2 {
+    font-size: 16px;
+  }
+}
+
+/* iPad */
+@media (min-width: 769px) and (max-width: 1024px) {
+  main {
+    padding: 30px;
+    min-height: calc(100vh - 170px);
+  }
+}
+
+/* Laptop / PC */
+@media (min-width: 1025px) {
+  main {
+    padding: 50px;
+    min-height: calc(100vh - 190px);
+  }
 }
