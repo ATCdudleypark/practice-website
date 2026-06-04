@@ -107,3 +107,10 @@ nav a {
     animation-duration: 14s;
   }
 }
+
+
+marquee h2 {
+    color: white;
+    font-size: 22px;
+    margin: 0;
+}
