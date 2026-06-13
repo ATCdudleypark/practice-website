@@ -473,6 +473,23 @@ MK Verma IT Services is committed to providing professional support, fast servic
             <audio controls>
   <source src="/audio/remix.mp3" type="audio/mpeg" />
 </audio>
+
+     <audio id="radio" controls></audio>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+<script>
+const streamUrl = "https://mediaserviceslive.akamaized.net/hls/live/2109456/triplejnsw/v0-221.m3u8";
+const audio = document.getElementById('radio');
+
+if (Hls.isSupported()) {
+  const hls = new Hls();
+  hls.loadSource(streamUrl);
+  hls.attachMedia(audio);
+} else {
+  audio.src = streamUrl;
+}
+</script>
     </main>
                               
 <div class="mk">
