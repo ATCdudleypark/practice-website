@@ -1,0 +1,480 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <head>
+  <meta charset="UTF-8">
+  <title>MK Verma</title>
+
+  <!-- ✅ Google Analytics START -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-SK8708QLYV"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-SK8708QLYV');
+  </script>
+  <!-- ✅ Google Analytics END -->
+
+</head>
+<meta charset="UTF-8">
+<title>MK Verma </title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+/* HEADER */
+header {
+    background-color: #0f5a08;
+    padding: 15px 0;
+}
+
+nav {
+    display: flex;
+    justify-content: center;
+}
+
+nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+}
+
+nav ul li {
+    position: relative;
+}
+
+nav ul li a {
+    color: rgb(238, 224, 224);
+    padding: 15px 20px;
+    text-decoration: none;
+    display: block;
+    cursor: pointer;
+}
+
+nav ul li a:hover {
+    background-color: #031301;
+}
+
+/* DROPDOWN */
+nav ul li ul {
+    display: none;
+    position: absolute;
+    background-color: #0f5a08;
+    top: 50px;
+    min-width: 150px;
+    z-index: 9999;
+}
+
+nav ul li ul li a {
+    padding: 10px;
+}
+
+nav ul li:hover ul {
+    display: block;
+}
+
+/* MAIN */
+main {
+    padding: 40px;
+    text-align: center;
+}
+
+/* CLOCK */
+.clock {
+    width: 260px;
+    height: 260px;
+    border: 8px solid #0a0c08;
+    border-radius: 50%;
+    margin: 30px auto;
+    position: relative;
+    background: rgb(179, 194, 178);
+}
+
+/* NUMBERS */
+.number {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    font-weight: bold;
+}
+
+.number span {
+    display: block;
+    transform: translateY(10px);
+}
+
+/* HAND BASE */
+.hand {
+    position: absolute;
+    bottom: 50%;
+    left: 50%;
+    transform-origin: bottom;
+    transform: translateX(-50%);
+}
+
+/* HOUR HAND */
+.hour {
+    width: 10px;
+    height: 65px;
+    background: black;
+    border-radius: 10px;
+    z-index: 3;
+}
+
+/* MINUTE HAND */
+.minute {
+    width: 6px;
+    height: 90px;
+    background: black;
+    border-radius: 10px;
+    z-index: 2;
+}
+
+/* SECOND HAND */
+.second {
+    width: 2px;
+    height: 120px;
+    background: red;
+    z-index: 1;
+}
+
+/* HOUR = M */
+.hour::after {
+    content: "M";
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    background: black;
+    color: white;
+    font-size: 11px;
+    font-weight: bold;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: translateX(-50%);
+}
+
+/* MINUTE = K */
+.minute::after {
+    content: "K";
+    position: absolute;
+    top: 25px;
+    left: 50%;
+    width: 18px;
+    height: 18px;
+    background: black;
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: translateX(-50%);
+}
+
+/* SECOND = VERMA (VISIBLE) */
+.second::after {
+    content: "VERMA";
+    position: absolute;
+    top: 30px;
+    left: 50%;
+    width: 16px;
+    height: 16px;
+    background: red;
+    color: white;
+    font-size: 9px;
+    font-weight: bold;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: translateX(-50%);
+}
+
+/* CENTER TEXT */
+.center-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 22px;
+    font-weight: bold;
+}
+
+/* FOOTER */
+footer {
+    background-color: #0f5a08;
+    color: white;
+    text-align: center;
+    padding: 15px;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+body{
+    margin:0;
+    font-family:Arial, sans-serif;
+}
+
+/* HEADER */
+header{
+    background:#0f5a08;
+}
+
+/* MAIN MENU */
+nav ul{
+    list-style:none;
+    margin:0;
+    padding:0;
+    display:flex;
+}
+
+nav ul li{
+    position:relative;
+}
+
+nav ul li a{
+    display:block;
+    color:white;
+    padding:15px 20px;
+    text-decoration:none;
+}
+
+nav ul li a:hover{
+    background:#031301;
+}
+
+/* FIRST DROPDOWN */
+nav ul li ul{
+    display:none;
+    position:absolute;
+    top:100%;
+    left:0;
+    background:#0f5a08;
+    min-width:200px;
+    padding:0;
+    z-index:999;
+}
+
+nav ul li:hover > ul{
+    display:block;
+}
+
+/* DROPDOWN ITEMS */
+nav ul li ul li{
+    width:100%;
+}
+
+nav ul li ul li a{
+    border-bottom:1px solid rgba(255,255,255,0.2);
+}
+
+/* SECOND DROPDOWN */
+.submenu{
+    position:relative;
+}
+
+.submenu .sub-dropdown{
+    display:none;
+    position:absolute;
+    left:200px;
+    top:0;
+    background:#0f5a08;
+    min-width:200px;
+}
+
+.submenu:hover .sub-dropdown{
+    display:block;
+}
+
+</style>
+
+</head>
+
+<body>
+
+</style>
+</head>
+
+<body>
+
+<header>
+
+<nav>
+
+<ul>
+
+<!-- HOME -->
+<li>
+<a href="https://www.mkverma.com">Home</a>
+</li>
+ 
+<li><a href="about.html">About  </a></li>
+
+<!-- All Australia Store -->
+ <li>
+
+<!--<a href="#">All Australia Store</a> -->
+
+<ul>
+
+    <!-- Electronic -->
+    <li class="submenu">
+
+        <a href="#">Electronic Store </a>
+
+        <!-- SECOND MENU -->
+        <ul class="sub-dropdown">
+
+            <li><a href="https://www.jbhifi.com.au/" target="_blank">JB Hi-Fi</a></li>
+                    <li><a href="https://www.thegoodguys.com.au/" target="_blank"> The Good Guys</a></li>
+                    <li><a href="https://www.harveynorman.com.au/" target="_blank"> Harvey Norman</a></li>
+                    <li><a href="https://www.temu.com.au/" target="_blank"> Temu</a></li>
+                    <li><a href="https://www.officeworks.com.au/" target="_blank"> Office Works</a></li>
+                    <li><a href="https://www.officenational.com.au/shop/en/obb2cstore" target="_blank"> Office National</a></li>
+                    <li><a href="https://www.bunnings.com.au/" target="_blank"> Bunning</a></li>
+                    <li><a href="https://www.bigw.com.au/" target="_blank"> Big W </a></li>
+                    <li><a href="https://www.kogan.com/au/"target="_blank"> Kogan </a></li>
+                    <li><a href="https://www.dicksmith.com.au/da/"target="_blank"> Dick Smith </a></li>
+                    <li><a href="https://www.ebay.com.au/"target="_blank"> ebay </a></li>
+                    <li><a href="https://www.ikea.com/au/en/"target="_blank"> IKEA </a></li>
+                    <li><a href="https://www.kmart.com.au/"target=" _blank"> Kmart</a></li>
+                    <li><a href="https://www.target.com.au/"target=" _blank"> Target</a></li>
+                    <li><a href="https://www.myer.com.au/"target=" _blank"> Myer</a></li>
+                    <li><a href="https://www.myer.com.au/"target=" _blank"> Cotton On</a></li>
+        </ul>
+
+    </li>
+
+    <!-- Grocery Store -->
+    <li class="submenu">
+        <a href="#">Grocery Store </a>
+        <ul class="sub-dropdown">
+          <li><a href="https://www.coles.com.au/" target="_blank">Coles</a></li>
+                    <li><a href="https://www.woolworths.com.au/" target="_blank"> Woolworths</a></li>
+                    <li><a href="https://www.aldi.com.au/" target="_blank"> ALDI</a></li>
+                    <li><a href="https://drakes.com.au/" target="_blank"> Drakes</a></li>
+                    <li><a href="https://www.igashop.com.au/" target="_blank"> IGA </a></li>
+                    <li><a href="https://www.costco.com.au/" target="_blank"> Costco </a></li>  
+        </ul>
+    </li>
+
+    <!-- SEO -->
+     <li class="submenu">
+      <a href="#">Medical Store</a>
+      <ul class="sub-dropdown">
+ <li><a href="https://terrywhitechemmart.com.au/" target="_blank">TerryWhite </a></li>
+                    <li><a href="https://www.chemistwarehouse.com.au/" target="_blank"> ChemistWarehouse</a></li>
+                    <li><a href="https://www.priceline.com.au/" target="_blank"> Priceline</a></li>
+                    <li><a href="https://www.amcal.com.au/" target="_blank"> Amcal </a></li>
+                    <li><a href="https://www.stardiscountchemist.com.au/" target="_blank"> StartDiscountchemist </a></li>
+
+
+      </ul>
+    </li>
+
+    </li>
+
+    <!-- Coffee -->
+     <li class="submenu">
+      <a href="#">Coffee Store</a>
+      <ul class="sub-dropdown">
+ <li><a href="https://www.siciliacoffee.com.au/" target="_blank">Silica Coffee </a></li>
+                    <li><a href="https://thecoffeebeanshop.com.au/" target="_blank">The coffeebeansShop</a></li>
+                    <li><a href="https://soulcityroasters.com/" target="_blank"> Soulcityroaster</a></li>
+                    <li><a href="https://www.amcal.com.au/" target="_blank"> Amcal </a></li>
+                    <li><a href="https://www.stardiscountchemist.com.au/" target="_blank"> StartDiscountchemist </a></li>
+
+      </ul>
+    </li>
+    <!-- Fashion Store -->
+    <li class="submenu">
+        <a href="#"> Fashion & Clothing</a>
+         <ul class="sub-dropdown">
+         <li><a href="https://www.zara.com/au/" target="_blank">Zara</a></li>
+                    <li><a href="https://www2.hm.com/en_au/index.html" target="_blank"> H&M</a></li>
+                    <li><a href="https://www.uniqlo.com/au/en/" target="_blank"> UNIQLO</a></li>
+                    <li><a href="https://www.forever21.com/" target="_blank"> Forever 21 </a></li>   
+         </ul>
+    </li> 
+
+</ul>
+
+</li>
+
+
+</nav> 
+
+</header>
+
+
+    <h1>Digital Radio</h1>
+   
+
+
+
+
+
+    <main>
+        <div style="text-align:center; padding:20px; background:white; border-radius:10px; max-width:400px; margin:auto;">
+
+    <h2 style="color:#006400; margin-bottom:15px;">
+        📻 ABC Radio National
+    </h2>
+
+    <audio controls autoplay style="width:100%;">
+        <source src="https://live-radio01.mediahubaustralia.com/2RNW/mp3/" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+
+    <div style="text-align:center; padding:20px; background:white; border-radius:10px; max-width:400px; margin:auto;">
+
+    <h2 style="color:#006400; margin-bottom:15px;">
+        📻 Triple j
+    </h2>
+
+    <audio controls autoplay style="width:100%;">
+        <source src="http://live-radio01.mediahubaustralia.com/5TJW/mp3/" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+</div>
+ 
+<div style="text-align:center; padding:20px; background:white; border-radius:10px; max-width:400px; margin:auto;">
+
+    <h2 style="color:#006400; margin-bottom:15px;">
+        📻 Kiss FM
+    </h2>
+
+    <audio controls autoplay style="width:100%;">
+        <source src="http://live-radio01.mediahubaustralia.com/5TJW/mp3/" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+       
+
+</div>
+   
+
+ 
+
+    </main>
+                              
+
+<footer>
+<p><h6> © 2026 Manoj Kumar. All Rights Reserved. | Designed & Developed by Manoj Kumar</h6></p>
+       
+</footer>
+
+
+</html>
